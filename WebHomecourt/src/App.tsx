@@ -1,13 +1,25 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Login from './pages/Login'
 import Home from './pages/Home'
+import Agenda from './pages/Agenda'
+import Brackets from './pages/Brackets'
+import Estadisticas from './pages/Estadisticas'
+import LakersCourt from './pages/LakersCourt'
+import Juego from './pages/Juego'
+import Store from './pages/Store'
+import Perfil from './pages/Perfil'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/agenda" element={<Agenda />} />
+        <Route path="/brackets" element={<Brackets />} />
+        <Route path="/estadisticas" element={<Estadisticas />} />
+        <Route path="/lakerscourt" element={<LakersCourt />} />
+        <Route path="/juego" element={<Juego />} />
+        <Route path="/store" element={<Store />} />
+        <Route path="/perfil" element={<Perfil />} />
       </Routes>
     </BrowserRouter>
   )
