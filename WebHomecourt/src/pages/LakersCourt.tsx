@@ -3,8 +3,8 @@ import Map from "../components/Map"
 function LakersCourt() {
   return (
     <div>
-      <div className="flex flex-col items-center justify-center bg-black p-10">
-        <h1 className="text-white text-5xl font-bold">LakersCourt</h1>
+      <div className="flex flex-col items-center justify-center p-10">
+        <h1 className="text-5xl font-bold">LakersCourt</h1>
         <Nav current="LakersCourt" />
       </div>
       <div>
