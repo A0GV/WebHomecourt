@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from "react"
+import { getUserById, type User } from './User'
 
 const pages = [
   { label: 'Home',          path: '/' },
@@ -13,10 +15,21 @@ const pages = [
 
 interface NavProps {
   current: string
+  userId: string 
 }
 
-function Nav({ current }: NavProps) {
+function Nav({ current, userId }: NavProps) {
   const navigate = useNavigate()
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const data = await getUserById(userId)
+      setUser(data)
+    }
+
+    loadUser()
+  }, [userId])
 
   return (
     <div className="w-full">
@@ -54,13 +67,13 @@ function Nav({ current }: NavProps) {
           <div className="flex justify-start items-center gap-7">
             <div className="p-2.5 bg-white rounded-2xl outline outline-1 outline-offset-[-1px] outline-black/25 flex justify-start items-center gap-3.5">
               
-              <div className="justify-start text-black text-2xl font-normal font-['Graphik']">16,520</div>
+              <div className="justify-start text-black text-2xl font-normal font-['Graphik']">{user?.credits ?? 0}</div>
             </div>
 
             <div className="w-20 h-20 relative rounded-full outline outline-2 outline-offset-[-2px] outline-gray-200 overflow-hidden">
               <img
                 className="w-20 h-20 object-cover"
-                src="https://placehold.co/86x87"
+                src={user?.photo_url || 'https://placehold.co/86x87'}
                 alt="User avatar"
               />
             </div>
