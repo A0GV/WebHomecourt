@@ -24,7 +24,7 @@ async function createEvent(event: NewEvent) {
 
 export default function CreateEvent() {
   const [form, setForm] = useState<NewEvent>({
-    created_user_id: "c1998ce5-a357-4963-bda3-fde103393cdd",
+    created_user_id: "ac3a5447-1b6f-4324-8830-5ddc2d7b2c47",
     event_name: "",
     date: new Date().toISOString().split("T")[0],
     court_id: 1,
