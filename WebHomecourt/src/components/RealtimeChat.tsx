@@ -89,7 +89,7 @@ function RealtimeChat({
     setError(null)
 
     const outgoing: ChatMessage = {
-      id: crypto.randomUUID(),
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
       username: cleanUsername,
       message: cleanMessage,
       created_at: new Date().toISOString(),
