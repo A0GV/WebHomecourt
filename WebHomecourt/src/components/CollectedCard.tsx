@@ -75,10 +75,10 @@ export async function getUserCards(userId: string): Promise<CollectedCard[]> {
     return cards
 }
 
+// Gets the cards from prev funct
 function DisplayUserCards({ userId }: { userId: string }) {
     const [cards, setCards] = useState<CollectedCard[]>([])
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)  // ← new error state
 
     useEffect(() => {
         async function fetchCards() {
