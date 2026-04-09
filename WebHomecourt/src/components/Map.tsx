@@ -140,8 +140,8 @@ export default function Map() {
           </Marker>
         </MapContainer>
 
-        <div className="hc-map-chip hc-map-chip--city">Los Angeles, CA</div>
-        <div className="hc-map-chip hc-map-chip--location">My Location</div>
+        {/* <div className="hc-map-chip hc-map-chip--city">Los Angeles, CA</div>
+        <div className="hc-map-chip hc-map-chip--location">My Location</div> */}
       </div>
 
       <div className="hc-map-courts-strip">

@@ -1,15 +1,15 @@
 .hc-map-shell {
-  --hc-purple-900: #34115f;
-  --hc-purple-800: #45207a;
-  --hc-purple-700: #5a2f9a;
-  --hc-lilac-100: #f4f1fb;
-  --hc-lilac-200: #ebe5f8;
-  --hc-ink-700: #3f3552;
+  --hc-purple-900: #3b195c;
+  --hc-purple-800: #542581;
+  --hc-purple-700: #7e57d7;
+  --hc-lilac-100: #ffffff;
+  --hc-lilac-200: #f3f2f5;
+  --hc-ink-700: #6f6975;
 
   width: min(1120px, 100%);
   border-radius: 24px;
   overflow: hidden;
-  border: 1px solid rgba(54, 26, 97, 0.2);
+  border: 0.8px solid #e7e6e8;
   background: var(--hc-lilac-200);
   box-shadow: 0 28px 52px rgba(35, 17, 61, 0.3);
 }
@@ -20,8 +20,9 @@
   justify-content: space-between;
   gap: 12px;
   padding: 18px 24px;
-  background: linear-gradient(130deg, #4d2090 0%, var(--hc-purple-800) 55%, var(--hc-purple-900) 100%);
-  color: #f8f4ff;
+  background: #3b195c;
+  border-bottom: 0.8px solid #e7e6e8;
+  color: #f3f2f3;
 }
 
 .hc-map-topbar-title {
@@ -39,8 +40,8 @@
   width: 12px;
   height: 12px;
   border-radius: 999px;
-  background: #f8ba38;
-  box-shadow: 0 0 0 4px rgba(248, 186, 56, 0.22);
+  background: #fcb136;
+  box-shadow: none;
 }
 
 .hc-map-topbar-actions {
@@ -55,13 +56,13 @@
   padding: 10px 20px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #ece3ff;
-  background: rgba(255, 255, 255, 0.14);
+  color: rgba(169, 157, 182, 0.83);
+  background: rgba(147, 130, 164, 0.64);
 }
 
 .hc-map-pill--active {
-  color: #ffffff;
-  background: linear-gradient(120deg, #8f78ff 0%, #6f5dff 100%);
+  color: #e7e6e8;
+  background: #7e57d7;
   box-shadow: 0 10px 18px rgba(20, 10, 44, 0.35);
 }
 
@@ -76,7 +77,7 @@
   inset: 0;
   z-index: 320;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(57, 30, 96, 0.04) 0%, rgba(27, 12, 49, 0.2) 100%);
+  background: linear-gradient(180deg, rgba(17, 6, 26, 0.3) 0%, rgba(0, 0, 0, 0) 50%, rgba(17, 6, 26, 0.5) 100%);
 }
 
 .hc-map-canvas {
@@ -88,13 +89,13 @@
   position: absolute;
   z-index: 500;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.44);
+  border: 0.8px solid rgba(84, 37, 129, 0.5);
   padding: 12px 18px;
-  color: #fbf8ff;
+  color: #f3f2f3;
   font-size: 1.02rem;
   font-weight: 700;
   backdrop-filter: blur(4px);
-  background: rgba(74, 31, 133, 0.88);
+  background: rgba(59, 25, 92, 0.9);
   box-shadow: 0 14px 24px rgba(29, 13, 52, 0.35);
 }
 
@@ -106,6 +107,8 @@
 .hc-map-chip--location {
   left: 28px;
   bottom: 24px;
+  border: 0.8px solid rgba(148, 130, 165, 0.3);
+  background: #542581;
 }
 
 .hc-map-courts-strip {
@@ -114,7 +117,8 @@
   gap: 12px;
   overflow-x: auto;
   padding: 16px 20px;
-  background: #f2eff8;
+  border-top: 0.8px solid #e7e6e8;
+  background: #f3f2f5;
 }
 
 .hc-map-courts-strip::-webkit-scrollbar {
@@ -128,18 +132,18 @@
 
 .hc-map-court-card {
   flex: 0 0 auto;
-  border: 1px solid rgba(63, 38, 105, 0.18);
+  border: 0.8px solid #e7e6e8;
   border-radius: 14px;
   padding: 12px 24px;
   color: var(--hc-ink-700);
   font-size: 1.02rem;
   font-weight: 700;
-  background: var(--hc-lilac-100);
+  background: #ffffff;
 }
 
 .hc-map-stage .leaflet-container {
   font-family: "Graphik", sans-serif;
-  background: #d7d2e3;
+  background: #1a1a2e;
 }
 
 .hc-map-stage .leaflet-top.leaflet-left {
@@ -160,10 +164,10 @@
   height: 42px;
   line-height: 42px;
   margin: 8px 0 0;
-  border: 0;
+  border: 0.8px solid rgba(84, 37, 129, 0.5);
   border-radius: 14px;
-  color: #ffffff;
-  background: rgba(65, 27, 116, 0.95);
+  color: #f3f2f3;
+  background: rgba(59, 25, 92, 0.9);
   box-shadow: 0 12px 20px rgba(32, 14, 55, 0.38);
 }
 
