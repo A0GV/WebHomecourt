@@ -1,9 +1,85 @@
 import { useNavigate } from 'react-router-dom'
+import type { GameItem } from '../../pages/Agenda' // Has to be a type cosa estupida
 
-// Individual item for each game
-interface GameListItemProp {
-  game_id: string; 
-  home: boolean;
-  start_date: string; 
-  
+// Prop for the game item
+type GameProp = {
+  games: GameItem[]; 
 }
+
+/*
+function GameListItem({ games }: GameProp) {
+  return (
+        <div>
+            {games.map(game => (
+                <div
+                    key={game.game_id}
+                    className="bg-white rounded-md justify-center text-center px-2 py-3 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-[14.625rem] min-h-[20.5rem]">
+                    <h1 className="text-lg font-black ">{game.opposing_team_id}</h1>
+                    <img src={game.logo_url} alt="Opposite team" className="w-[10.75rem] max-h-[14.25rem] mx-auto" />
+                    <p>Lakers: ${game.lakers_score}</p>
+                    <p>Opposing: {game.opposite_score}</p>
+                </div>
+            ))}
+        </div>
+    )
+}; */
+
+/*
+function GameListItem({ games }: GameProp) {
+  if (!games.length) {
+    return <p>No games available for this month.</p>
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-5 gap-5 font-['Graphik']">
+      {games.map(game => (
+        <div
+          key={game.game_id}
+          className="bg-white rounded-md justify-center text-center px-2 py-3 shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] w-[14.625rem] min-h-[20.5rem]">
+          <h1 className="text-lg font-black ">
+            {game.home ? "Home" : "Away"} vs Team {game.opposing_team_id}
+          </h1>
+          <img src={game.logo_url} alt="Team Logo" className="w-[10.75rem] max-h-[14.25rem] mx-auto" />
+          <p>Date: {new Date(game.start_date).toLocaleString()}</p>
+          <p>Score: {game.lakers_score} - {game.opposite_score}</p>
+        </div>
+      ))}
+    </div>
+  );
+}*/
+
+function GameListItem({ games }: GameProp) {
+  if (!games.length) {
+    return <p>No games available for this month.</p>
+  }
+
+  return (
+    <div className="grid grid-cols-4">
+      <div className="col-span-4">
+        {games.map(game => (
+          <div key={game.game_id} className="bg-white rounded gap-5 mb-7">
+
+            <img
+              src={game.logo_url}
+              alt={`Team ${game.opposing_team_id}`}
+              className="w-[3.75rem] max-h-[3.75rem] mx-auto col-span-1"
+            />
+
+            <h3 className="font-black">vs {game.team_name} </h3>
+
+            <p>Lakers: {game.lakers_score} - Opposing: {game.opposite_score}</p>
+
+            {/* Show whether won or lost */}
+            <p className="font-bold">
+              {game.lakers_score > game.opposite_score ? "Won" : "Lost"}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      
+    </div>
+  )
+}
+
+export default GameListItem;

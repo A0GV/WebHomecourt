@@ -1,17 +1,67 @@
 import { useEffect, useState } from 'react';
+import { supabase } from "../lib/supabase"
 import Nav from '../components/Nav'
 import Button from '../components/button.tsx'
+import GameListItem from '../components/Agenda/GameListItem.tsx'
+
+// Actually used in query
+export type GameItem = {
+  game_id: number,
+  opposing_team_id: number,
+  home: boolean,
+  start_date: string,
+  team_name: string,
+  logo_url: string, // Opp team pic
+  // Calculated by funct 
+  lakers_score: number,
+  opposite_score: number
+};
 
 // API call using current year and month and compares against the user selected date
-export async function getGames(year: number, month: number, date: number, time: number, currYear: number, currMonth: number) {
-  let allGames: Array<number>; // For agenda to disp all games 
+export async function getGames(year: number, month: number, day: number, hour: number, minutes: number, currentDate: Date) {
+  let allGames: Array<GameItem>; // For agenda to disp all games 
   // Query using all of the info w parametrized values to obtain all of the games in the current year and month selected 
+  // Connection to supabase, calls function in supabase passing param of year and month
+  const { data, error } = await supabase.rpc("get_agenda_games", {
+  p_year: year,
+  p_month: (month+1), // Must add month cause they're 0 based in typescript
+  }) 
+
+  // Smth died
+  if (error) {
+    console.error("Supabase error:", error.message)
+    throw new Error("Failed to get games in current month and year")
+  }
+
+  // Data is not formatted as array, entcs hace un array vacío and sends that will show no user colls
+  if (!Array.isArray(data)) return []
+
+  console.log("raw data:", JSON.stringify(data, null, 2)) // A ver como se ve lo q fue fetched
+
+  // Takes results del data and turns into the CollectedCard obj
+  const games: GameItem[] = data.map(row => {
+    // Creates the game items 
+    return {
+      game_id: row.game_id,
+      opposing_team_id: row.opposing_team_id,
+      home: row.home,
+      start_date: row.start_date,
+      team_name: row.team_name, 
+      logo_url: row.logo_url, // Opp team pic
+      // Calculated by funct 
+      lakers_score: row.lakers_score,
+      opposite_score: row.opposite_score
+    }
+  });
+
+  return games
 
 
   // For side display 
-  let pastGames: Array<number>;
-  let upcomingGames: Array<number>;
-  
+  //let pastGames: Array<number>;
+  //let upcomingGames: Array<number>;
+  //let partitionFound = false; // Boolean once finds the switch from older to new game, swaps
+
 
   // If selected month or selected year < curr month or curr year, viewing past games so adds all items to the list of past games 
 
@@ -25,7 +75,7 @@ export async function getGames(year: number, month: number, date: number, time: 
       // Adds to upcomingGames
     // Else if item date == selected date 
       // If item time < time (current, user can't mod it)
-        // Adds to pastGames
+       // Adds to pastGames
       // Else if item time > time 
         // Adds to upcomingGames
       // Else 
@@ -34,14 +84,29 @@ export async function getGames(year: number, month: number, date: number, time: 
   // Else no results so some error handling 
 
   // Return the lists of past and upcoming games 
-} 
+
+  // Return three lists ig... the allGames, pastGames, and upcomingGames
+}
 // Divide list into upcoming and past games using current date as reference to create two sublists
 
 function Agenda() {
   const [showUpcoming, setShowUpcoming] = useState(true); // Shows upcoming default but can switch to past 
 
+  // Default date set to right now
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [agendaDate, setAgendaDate] = useState(new Date());
+
+  // All fetched games here
+  const [allGames, setAllGames] = useState<GameItem[]>([]);
+
+  // Array for different games 
+  const [pastGames, setPastGames] = useState<GameItem[]>([]);
+  const [upcomingGames, setUpcomingGames] = useState<GameItem[]>([]);
+
   // Default dates 
   /*
+  const now = new Date(); // Base date
+
   const [currYear, setCurrYear] = useState(now.getFullYear()); // now.getFullYear()
   const [currMonth, setCurrMonth] = useState(now.getMonth());// For fetching months in agenda
   const [currDay, setCurrDay] = useState(now.getDay()); // Only use to show if curr month is the same as agenda month
@@ -50,27 +115,33 @@ function Agenda() {
   // Default to curr year and month
   const [agendaYear, setAgendaYear] = useState(now.getFullYear()); // now.getFullYear()
   const [agendaMonth, setAgendaMonth] = useState(now.getMonth);// For fetching months in agenda
-  const [agendaDay, setAgendaDay] = useState(); // Only use to show if curr month is the same as agenda month
+  const [agendaDay, setAgendaDay] = useState(now.getDay()); // Only use to show if curr month is the same as agenda month
+  */
 
   // Initial function to render
   useEffect(() => {
     // This code runs once after the initial render
     console.log("Agenda accessed");
+    console.log(`Current date ${currentDate}`);
 
     // Handle dates for agenda 
-    // Curr date formatting set as default
-    const now: Date = new Date();
-    currYear = setCurrYear(now.getFullYear());
+    const year = agendaDate.getFullYear();
+    const month = agendaDate.getMonth();
+    const day = agendaDate.getDate(); // Changed to first of the month for now can only toggle to view either full past or full upcoming games from other months 
+    const hour = agendaDate.getHours(); // See if i can change to 12:01 am to show all
+    const minutes = agendaDate.getMinutes(); // Would be a 1 min
 
-    // Set agenda variables to current default date and time 
+    // For me to see info
+    console.log(`Selected year: ${year}, month: ${month}, day: ${day}, time: ${hour}:${minutes}`);
 
-    // Function for api call 
-    getGames(currYear, currMonth, currDay, currTime, agendaYear, agendaMonth, agendaDay); 
-});*/
+    // Calls functs and then sets all the games found to the allGames arr here
+    getGames(year, month, day, hour, minutes, currentDate)
+    .then(games => setAllGames(games));
+  }, [agendaDate, currentDate]);
 
-// Funct to let user pick date from agenda, maybe this'll need to be handled in agenda component or as an export function idk
-// important thing is that if the user wants to view any other month, the cagendaDay is set to day 1 and time as 12:01 am 
-// to show either all as past or all as upcoming for that future entry
+  // Funct to let user pick date from agenda, maybe this'll need to be handled in agenda component or as an export function idk
+  // important thing is that if the user wants to view any other month, the cagendaDay is set to day 1 and time as 12:01 am 
+  // to show either all as past or all as upcoming for that future entry
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -117,7 +188,7 @@ function Agenda() {
             {/* Agenda list view, each item spans all 4 cols */}
             <div className="flex flex-col gap-2">
               {/* if showUpcoming == true, shows the UpcomingGameItem w upcomingGames list; else shows PastGameItem w pastGames list */}
-              {showUpcoming ? <p>Upcoming games list</p>: <p>Past games list</p>}
+              {showUpcoming ? <p>Upcoming games list</p> : <GameListItem games={allGames} />}
             </div>
 
           </div>
