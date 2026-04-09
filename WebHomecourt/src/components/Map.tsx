@@ -2,35 +2,54 @@ import { MapContainer, TileLayer, Popup, useMapEvents, Circle, CircleMarker, Mar
 import "leaflet/dist/leaflet.css";
 import { useEffect, useState } from "react";
 import type { LatLng } from "leaflet";
-import { supabase } from "../lib/supabase";
-
-
+import type { Court } from "../services/apiMAP";
+import { getCourts } from "../services/apiMAP";
 // const position:[number, number]  =[25.646014, -100.291006]
 
+type Status = "idle" | "loading" | "success" | "error";
 
-export interface Court {
-  court_id: number;
-  name: string;
-  direction: string;
-  longitude: number;
-  latitude: number;
-  allow_court: boolean;
-}
+function CourtsMarkers() {
+  const [courts, setCourts] = useState<Court[] | null>(null);
+  const [error, setError] = useState<string>("");
+  const [status, setStatus] = useState<Status>("idle");
 
-async function getCourts(){
-  const { data: court, error } = await supabase
-  .from('court')
-  .select('*')
-  if (error){
-    console.error(error.message)
-    return null
-  }
-  return court
+  useEffect(()=>{
+    async function loadCourts() {
+      try{
+        setStatus("loading");
+        const data = await getCourts();
+        console.log("Canchas obtenidas de la BD:", data);
+        if(data) {
+          setCourts(data);
+          setStatus("success");
+        }
+      } catch (error){
+        setStatus("error");
+        setError(error instanceof Error ? error.message : "No se pudo cargar.");
+      }
+    }
+
+    loadCourts();
+  }, []);
+
+  return (
+    <>
+      {courts?.map((court) => (
+        <Marker key={court.court_id} position={[court.latitude, court.longitude]}>
+          <Popup>
+            <b>{court.name}</b><br/>
+            {court.direction}
+          </Popup>
+        </Marker>
+      ))}
+    </>
+  );
 }
 
 function LocationMarker() {
   const [position, setPosition] = useState<LatLng | null>(null);
   const [error, setError] = useState<string>("");
+
   const map = useMapEvents({
     locationfound(e) {
       setPosition(e.latlng);
@@ -45,6 +64,7 @@ function LocationMarker() {
     map.locate({
       setView: true,
       maxZoom: 15,
+      enableHighAccuracy: true,
     });
   }, [map]);
 
@@ -87,6 +107,7 @@ export default function Map() {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <LocationMarker />
+      <CourtsMarkers />
       <Marker position={fallbackPosition}>
         <Popup>
           Cancha bb
