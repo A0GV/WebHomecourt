@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react';
 import type { GameItem } from '../../pages/Agenda' // Has to be a type cosa estupida
 import SummaryScoreCard from '../Agenda/GameScore.tsx' 
 import Button from '../button.tsx'
@@ -51,17 +52,17 @@ function GameListItem({ games }: GameProp) {
 }*/
 
 function GameListItem({ games }: GameProp) {
+  const homeBaseCSS = "flex flex-row justify-left bg-white rounded-lg outline-2 outline-gray-200 gap-5 mb-7 px-4 py-5 border-l-9"; // To inject css for home color bar
+
   if (!games.length) {
     return <p>No games available for this month.</p>
   }
-  
-  // Add logic to custom the css class name for home or away like just to keep border-color based on whether it's home or away
 
   return (
     <div className="grid">
       <div>
         {games.map(game => (
-          <div key={game.game_id} className="flex flex-row justify-left bg-white rounded-lg outline-2 outline-gray-200 gap-5 mb-7 px-4 py-5 border-l-9 border-morado-lakers">
+          <div key={game.game_id} className={`${homeBaseCSS} border-morado-lakers`}>
             <img
               src={game.logo_url}
               alt={`Logo ${game.team_name}`}
