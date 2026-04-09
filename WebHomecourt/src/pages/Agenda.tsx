@@ -164,7 +164,7 @@ function Agenda() {
           </div>
 
           {/* Side list view spanning 4 cols w buttons */}
-          <div className="col-span-4 bg-gray-400 p-4">
+          <div className="col-span-4 bg-transparent p-4">
             {/* Game type toggles*/}
             <div className="grid grid-cols-2 gap-2 mb-4">
               <div className="col-span-1">

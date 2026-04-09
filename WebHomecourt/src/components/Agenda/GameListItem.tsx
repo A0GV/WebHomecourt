@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import type { GameItem } from '../../pages/Agenda' // Has to be a type cosa estupida
+import SummaryScoreCard from '../Agenda/GameScore.tsx' 
+import Button from '../button.tsx'
 
 // Prop for the game item
 type GameProp = {
@@ -54,10 +56,10 @@ function GameListItem({ games }: GameProp) {
   }
 
   return (
-    <div className="grid grid-cols-4">
-      <div className="col-span-4">
+    <div className="grid">
+      <div>
         {games.map(game => (
-          <div key={game.game_id} className="bg-white rounded gap-5 mb-7">
+          <div key={game.game_id} className="bg-white rounded outline-2 outline-gray-200 gap-5 mb-7 px-4 py-5">
 
             <img
               src={game.logo_url}
@@ -65,7 +67,12 @@ function GameListItem({ games }: GameProp) {
               className="w-[3.75rem] max-h-[3.75rem] mx-auto col-span-1"
             />
 
-            <h3 className="font-black">vs {game.team_name} </h3>
+            {/* Name and date */}
+            <div>
+              <h3 className="font-black">vs {game.team_name} </h3>
+              <p>{game.start_date}</p>
+            </div>
+            
 
             <p>Lakers: {game.lakers_score} - Opposing: {game.opposite_score}</p>
 
@@ -73,6 +80,15 @@ function GameListItem({ games }: GameProp) {
             <p className="font-bold">
               {game.lakers_score > game.opposite_score ? "Won" : "Lost"}
             </p>
+            <SummaryScoreCard lakers_score={game.lakers_score} opposite_score={game.opposite_score} />
+
+            <Button
+              text="Recap"
+              type="primary"
+              onClick={() => {}} // Update to use redirect 
+              //className="w-full"
+            />
+
           </div>
         ))}
       </div>

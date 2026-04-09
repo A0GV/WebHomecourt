@@ -7,13 +7,21 @@ interface SummaryScoreProp {
 }
 
 function SummaryScoreCard(prop: SummaryScoreProp) {
-    const [winStatus, setWinStatus] = useState();
+    const [winStatus, setWinStatus] = useState(true);
 
-    // When loads, calc if won or lost 
-    
+    // When loads, checks if they lost
+    useEffect(() => {
+        if (prop.lakers_score < prop.opposite_score) {
+            setWinStatus(false); 
+        }
+    }); 
 
     // 
-    return {
-
-    }
+    return (
+        <div>
+            {winStatus ? <div className="bg-green-100 text-green-800 outline-2 outline-green-800 rounded ">{prop.lakers_score} - {prop.opposite_score}</div> : <div className="bg-red-100 text-red-800 outline-2 outline-red-800 rounded">{prop.lakers_score} - {prop.opposite_score}</div>}
+        </div>
+    );
 }
+
+export default SummaryScoreCard;
