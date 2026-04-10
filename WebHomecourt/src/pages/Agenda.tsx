@@ -4,6 +4,12 @@ import Nav from '../components/Nav'
 import Button from '../components/button.tsx'
 import GameListItem from '../components/Agenda/GameListItem.tsx'
 
+/* 
+TODO 
+* Calculate the lakers won vs losses per item, and maybe need to add a row to the GameItem itself
+* Maybe might need to add live so in case the game end time is null, that menas it's ongoing so it'll appear as a live game
+*/
+
 // Actually used in query
 export type GameItem = {
   game_id: number,
@@ -100,23 +106,9 @@ function Agenda() {
   const [allGames, setAllGames] = useState<GameItem[]>([]);
 
   // Array for different games 
-  const [pastGames, setPastGames] = useState<GameItem[]>([]);
-  const [upcomingGames, setUpcomingGames] = useState<GameItem[]>([]);
+  //const [pastGames, setPastGames] = useState<GameItem[]>([]);
+  //const [upcomingGames, setUpcomingGames] = useState<GameItem[]>([]);
 
-  // Default dates 
-  /*
-  const now = new Date(); // Base date
-
-  const [currYear, setCurrYear] = useState(now.getFullYear()); // now.getFullYear()
-  const [currMonth, setCurrMonth] = useState(now.getMonth());// For fetching months in agenda
-  const [currDay, setCurrDay] = useState(now.getDay()); // Only use to show if curr month is the same as agenda month
-  const [currTime, setCurrTime] = useState(now.getTime()); 
-
-  // Default to curr year and month
-  const [agendaYear, setAgendaYear] = useState(now.getFullYear()); // now.getFullYear()
-  const [agendaMonth, setAgendaMonth] = useState(now.getMonth);// For fetching months in agenda
-  const [agendaDay, setAgendaDay] = useState(now.getDay()); // Only use to show if curr month is the same as agenda month
-  */
 
   // Initial function to render
   useEffect(() => {
@@ -137,7 +129,21 @@ function Agenda() {
     // Calls functs and then sets all the games found to the allGames arr here
     getGames(year, month, day, hour, minutes, currentDate)
     .then(games => setAllGames(games));
+
+    // Try to divide into past and upcoming
+    //setPastGames(allGames.filter(game => new Date(game.start_date) < currentDate));
+    //setUpcomingGames(allGames.filter(game => new Date(game.start_date) >= currentDate));
   }, [agendaDate, currentDate]);
+
+  // Div into pastgames checking if curr game item is smaller than current date 
+  const pastGames = allGames.filter(
+    (game) => new Date(game.start_date) < currentDate
+  );
+
+  // Upcoming game hasn't started or just started
+  const upcomingGames = allGames.filter(
+    (game) => new Date(game.start_date) >= currentDate
+  );
 
   // Funct to let user pick date from agenda, maybe this'll need to be handled in agenda component or as an export function idk
   // important thing is that if the user wants to view any other month, the cagendaDay is set to day 1 and time as 12:01 am 
@@ -187,8 +193,8 @@ function Agenda() {
 
             {/* Agenda list view, each item spans all 4 cols */}
             <div className="flex flex-col gap-2">
-              {/* if showUpcoming == true, shows the UpcomingGameItem w upcomingGames list; else shows PastGameItem w pastGames list */}
-              {showUpcoming ? <p>Upcoming games list</p> : <GameListItem games={allGames} />}
+              {/* if showUpcoming == true, shows the UpcomingGameItem w upcomingGames list; else shows PastGameItem w pastGames list reversed to show from closer to curr date backwards*/}
+              {showUpcoming ? <GameListItem games={upcomingGames} /> : <GameListItem games={pastGames.reverse()} />}
             </div>
 
           </div>
