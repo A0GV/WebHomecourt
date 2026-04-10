@@ -5,7 +5,7 @@ import "./Map.css";
 import { useEffect, useState } from "react";
 import type { LatLng } from "leaflet";
 import type { Court } from "../services/apiMAP";
-import { getCourts } from "../services/apiMAP";
+import { getCiudad, getCourts } from "../services/apiMAP";
 
 function getCourtIcon(label: number | string) {
   return divIcon({
@@ -22,24 +22,11 @@ function getCourtIcon(label: number | string) {
   });
 }
 
-function CourtsMarkers() {
-  const [courts, setCourts] = useState<Court[]>([]);
-  const [error, setError] = useState<string>("");
+
+
+
+function CourtsMarkers({ courts, error }: { courts: Court[]; error: string }) {
   const fallbackPosition: [number, number] = [34.048408, -118.252957];
-
-  useEffect(() => {
-    async function loadCourts() {
-      try {
-        const data = await getCourts();
-        console.log("Canchas obtenidas de la BD:", data);
-        setCourts(data ?? []);
-      } catch (error) {
-        setError(error instanceof Error ? error.message : "No se pudo cargar.");
-      }
-    }
-
-    loadCourts();
-  }, []);
 
   return (
     <>
@@ -60,7 +47,7 @@ function CourtsMarkers() {
   );
 }
 
-function LocationMarker() {
+function LocationMarker({ locateRequest, onCityChange }: { locateRequest: number; onCityChange: (city: string) => void }) {
   const [position, setPosition] = useState<LatLng | null>(null);
   const [error, setError] = useState<string>("");
 
@@ -71,6 +58,7 @@ function LocationMarker() {
     },
     locationerror() {
       setError("No se pudo obtener tu ubicacion.");
+      onCityChange("Ubicacion no disponible");
     },
   });
 
@@ -81,6 +69,49 @@ function LocationMarker() {
       enableHighAccuracy: true,
     });
   }, [map]);
+
+  useEffect(() => {
+    if (locateRequest === 0) {
+      return;
+    }
+
+    map.locate({
+      setView: true,
+      maxZoom: 15,
+      enableHighAccuracy: true,
+    });
+  }, [map, locateRequest]);
+
+  useEffect(() => {
+    const currentPosition = position;
+
+    if (currentPosition === null) {
+      return;
+    }
+
+    const { lat, lng } = currentPosition;
+
+    let isCancelled = false;
+
+    async function loadCurrentCity() {
+      try {
+        const city = await getCiudad(lat, lng);
+        if (!isCancelled) {
+          onCityChange(city ?? "Ciudad no disponible");
+        }
+      } catch {
+        if (!isCancelled) {
+          onCityChange("Ciudad no disponible");
+        }
+      }
+    }
+
+    loadCurrentCity();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [position, onCityChange]);
 
   return position === null ? (
     error ? <Popup position={map.getCenter()}>{error}</Popup> : null
@@ -113,7 +144,24 @@ function LocationMarker() {
 
 export default function Map() {
   const fallbackPosition: [number, number] = [34.048408, -118.252957];
-  const courtCards = ["Court A", "Court B", "Court C", "Court D", "Court E"]; // Creo que pondremos los nombres que ya tienen
+  const [courts, setCourts] = useState<Court[]>([]);
+  const [error, setError] = useState<string>("");
+  const [locateRequest, setLocateRequest] = useState(0);
+  const [currentCity, setCurrentCity] = useState("Detectando ciudad...");
+
+  useEffect(() => {
+    async function loadCourts() {
+      try {
+        const data = await getCourts();
+        console.log("Canchas obtenidas de la BD:", data);
+        setCourts(data ?? []);
+      } catch (loadError) {
+        setError(loadError instanceof Error ? loadError.message : "No se pudo cargar.");
+      }
+    }
+
+    loadCourts();
+  }, []);
 
   return (
     <section className="hc-map-shell">
@@ -131,25 +179,26 @@ export default function Map() {
             attribution="© OpenStreetMap contributors"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <LocationMarker />
-          <CourtsMarkers />
-          <Marker position={fallbackPosition} icon={getCourtIcon("H")}>
-            <Popup>
-              Cancha bb
-            </Popup>
-          </Marker>
+          <LocationMarker locateRequest={locateRequest} onCityChange={setCurrentCity} />
+          <CourtsMarkers courts={courts} error={error} />
         </MapContainer>
 
-        {/* <div className="hc-map-chip hc-map-chip--city">Los Angeles, CA</div>
-        <div className="hc-map-chip hc-map-chip--location">My Location</div> */}
+        <div className="hc-map-chip hc-map-chip--city">{currentCity}</div>
+        <button onClick={() => setLocateRequest((prev) => prev + 1)} type="button" className="hc-map-chip hc-map-chip--location">My Location</button> {/* Creo que es medio diucktpae lol, pero esta con prev prev + porque asi, hago que se detecte un cambio y se use como trigger. Ya con esto, hace que se active el location marker, y hace map.locate entonces asi lo lleva a la ubi */}
       </div>
 
       <div className="hc-map-courts-strip">
-        {courtCards.map((courtCard) => (
-          <button key={courtCard} type="button" className="hc-map-court-card">
-            {courtCard}
+        {courts.length > 0 ? (
+          courts.map((court) => (
+            <button key={court.court_id} type="button" className="hc-map-court-card">
+              {court.name}
+            </button>
+          ))
+        ) : (
+          <button type="button" className="hc-map-court-card" disabled>
+            {error ? "No se pudieron cargar las canchas" : "Cargando canchas..."}
           </button>
-        ))}
+        )}
       </div>
     </section>
   );
