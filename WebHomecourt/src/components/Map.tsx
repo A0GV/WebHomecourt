@@ -192,18 +192,20 @@ export default function Map() {
   }, [courts, map, selectedCourtId]);
 
   return (
-    <section className="hc-map-shell">
-      <header className="hc-map-topbar">
-        <p className="hc-map-topbar-title">MAP VIEW</p>
-        <div className="hc-map-topbar-actions">
-          <button type="button" className="hc-map-pill hc-map-pill--active">Satellite</button>
-          <button type="button" className="hc-map-pill">List</button>
+    <section className="w-full max-w-[1120px] overflow-hidden rounded-[24px] border border-[#e7e6e8] bg-[#f3f2f5] shadow-[0_28px_52px_rgba(35,17,61,0.3)] max-[640px]:rounded-[18px]">
+      <header className="flex items-center justify-between gap-3 border-b border-[#e7e6e8] bg-[#3b195c] px-6 py-[18px] text-[#f3f2f3] max-[900px]:flex-wrap max-[900px]:justify-center max-[640px]:p-[14px]">
+        <p className="m-0 flex items-center gap-[10px] text-[0.95rem] font-bold tracking-[0.08em]">
+          <span className="h-3 w-3 rounded-full bg-[#fcb136]" aria-hidden="true" />
+          MAP VIEW
+        </p>
+        <div className="flex items-center gap-[10px]">
+          <button type="button" className="rounded-full bg-[#7e57d7] px-5 py-[10px] text-[0.95rem] font-semibold text-[#e7e6e8] shadow-[0_10px_18px_rgba(20,10,44,0.35)]">Satellite</button>
+          <button type="button" className="rounded-full bg-[rgba(147,130,164,0.64)] px-5 py-[10px] text-[0.95rem] font-semibold text-[rgba(169,157,182,0.83)]">List</button>
         </div>
       </header>
 
       <div className="hc-map-stage">
-        {/* Aqui lo de ref = setMap es para poder usarlo fuera de el mapa, por asi decirlo. Cuando se renderiza, lo guarda y ya lo pueda usar fuera para poder ir si se selecionanuna cancha desde fuera. Si no tuviera la referencia no podria acceder desde fuera al componente */}
-        <MapContainer center={fallbackPosition} zoom={13} className="hc-map-canvas" ref={setMap}>
+        <MapContainer center={fallbackPosition} zoom={13} className="h-[560px] w-full max-[900px]:h-[460px] max-[640px]:h-[360px]" ref={setMap}>
           <TileLayer
             attribution="© OpenStreetMap contributors"
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -217,24 +219,30 @@ export default function Map() {
           />
         </MapContainer>
 
-        <div className="hc-map-chip hc-map-chip--city">{currentCity}</div>
-        <button onClick={() => setLocateRequest((prev) => prev + 1)} type="button" className="hc-map-chip hc-map-chip--location">My Location</button> {/* Creo que es medio diucktpae lol, pero esta con prev prev + porque asi, hago que se detecte un cambio y se use como trigger. Ya con esto, hace que se active el location marker, y hace map.locate entonces asi lo lleva a la ubi */}
+        <div className="hc-map-chip-base hc-map-chip--city">{currentCity}</div>
+        <button
+          onClick={() => setLocateRequest((prev) => prev + 1)}
+          type="button"
+          className="hc-map-chip-base hc-map-chip--location"
+        >
+          My Location
+        </button>
       </div>
 
-      <div className="hc-map-courts-strip">
+      <div className="hc-map-courts-strip flex items-center gap-3 overflow-x-auto border-t border-[#e7e6e8] bg-[#f3f2f5] px-5 py-4">
         {courts.length > 0 ? (
           courts.map((court) => (
             <button
               key={court.court_id}
               type="button"
-              className={`hc-map-court-card${selectedCourtId === court.court_id ? " hc-map-court-card--selected" : ""}`}
+              className={`hc-map-court-card-base${selectedCourtId === court.court_id ? " hc-map-court-card-base--selected" : ""}`}
               onClick={() => setSelectedCourtId(court.court_id)}
             >
               {court.name}
             </button>
           ))
         ) : (
-          <button type="button" className="hc-map-court-card" disabled>
+          <button type="button" className="hc-map-court-card-base hc-map-court-card-base--disabled" disabled>
             {error ? "No se pudieron cargar las canchas" : "Cargando canchas..."}
           </button>
         )}
