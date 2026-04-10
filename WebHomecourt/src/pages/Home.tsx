@@ -1,10 +1,9 @@
 import Nav from '../components/Nav'
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
-import RealtimeChat from '../components/RealtimeChat'
-import SignInButton from '../components/botongoogle'
-function Home() {
+import MarcadorActivo from '../components/Home/Marcador'
 
+function Home() {
   
     useEffect(() => {
       const loadUser = async () => {
@@ -31,7 +30,8 @@ function Home() {
 
   return (
     <div>
-      
+      <Nav current='Home'></Nav>
+      <MarcadorActivo></MarcadorActivo>
       
     </div>
   )
