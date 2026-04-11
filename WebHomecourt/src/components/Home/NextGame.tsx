@@ -45,6 +45,7 @@ export const useTemporizador = (startDate?: string) =>{
     return segundos;
 };
 
+//Maybe cambiarlo a dias, horas, min, seg
 const formatTime = (seg: number) => {
     const h = Math.floor(seg / 3600);
     const m = Math.floor((seg % 3600) / 60);
