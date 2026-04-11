@@ -1,213 +1,56 @@
-.hc-map-stage {
-  position: relative;
-  isolation: isolate;
-}
+/* ─── Leaflet container ─── */
+.hc-map-canvas { font-family: "Graphik", sans-serif; background: #1a1a2e; }
 
-.hc-map-stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 320;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(17, 6, 26, 0.3) 0%, rgba(0, 0, 0, 0) 50%, rgba(17, 6, 26, 0.5) 100%);
-}
-
-.hc-map-chip-base {
-  position: absolute;
-  z-index: 500;
-  border-radius: 14px;
-  border: 0.8px solid rgba(84, 37, 129, 0.5);
-  padding: 12px 18px;
-  color: #f3f2f3;
-  font-size: 1.02rem;
-  font-weight: 700;
-  backdrop-filter: blur(4px);
-  background: rgba(59, 25, 92, 0.9);
-  box-shadow: 0 14px 24px rgba(29, 13, 52, 0.35);
-}
-
-.hc-map-chip--city {
-  left: 28px;
-  top: 24px;
-}
-
-.hc-map-chip--location {
-  left: 28px;
-  bottom: 24px;
-  border: 0.8px solid rgba(148, 130, 165, 0.3);
-  background: #542581;
-}
-
-.hc-map-court-card-base {
-  flex: 0 0 auto;
-  border-radius: 14px;
-  border: 0.8px solid #e7e6e8;
-  padding: 12px 24px;
-  color: #6f6975;
-  font-size: 1.02rem;
-  font-weight: 700;
-  background: #ffffff;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease;
-}
-
-.hc-map-court-card-base:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 16px rgba(45, 23, 72, 0.16);
-}
-
-.hc-map-court-card-base--selected {
-  border-color: #7e57d7;
-  color: #3b195c;
-  background: #eee6ff;
-  box-shadow: 0 10px 20px rgba(47, 20, 79, 0.25);
-}
-
-.hc-map-court-card-base--disabled {
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
-.hc-map-courts-strip::-webkit-scrollbar {
-  height: 7px;
-}
-
-.hc-map-courts-strip::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(82, 47, 134, 0.35);
-}
-
-.hc-map-stage .leaflet-container {
-  font-family: "Graphik", sans-serif;
-  background: #1a1a2e;
-}
-
+/* Reposicionar zoom controls */
 .hc-map-stage .leaflet-top.leaflet-left {
-  top: auto;
-  left: auto;
-  right: 18px;
-  bottom: 84px;
+  top: auto; left: auto; right: 18px; bottom: 84px;
+}
+@media (max-width: 640px) {
+  .hc-map-stage .leaflet-top.leaflet-left { right: 12px; bottom: 70px; }
 }
 
-.hc-map-stage .leaflet-control-zoom {
-  border: 0;
-  box-shadow: none;
-  margin: 0;
-}
-
-.hc-map-stage .leaflet-control-zoom a {
-  width: 42px;
-  height: 42px;
-  line-height: 42px;
-  margin: 8px 0 0;
-  border: 0.8px solid rgba(84, 37, 129, 0.5);
-  border-radius: 14px;
-  color: #f3f2f3;
-  background: rgba(59, 25, 92, 0.9);
+.hc-map-canvas .leaflet-control-zoom { border: 0; box-shadow: none; margin: 0; }
+.hc-map-canvas .leaflet-control-zoom a {
+  width: 42px; height: 42px; line-height: 42px; margin: 8px 0 0;
+  border: 0.8px solid rgba(84, 37, 129, 0.5); border-radius: 14px;
+  color: #f3f2f3; background: rgba(59, 25, 92, 0.9);
   box-shadow: 0 12px 20px rgba(32, 14, 55, 0.38);
 }
+.hc-map-canvas .leaflet-control-zoom a:hover { color: #fff; background: #7e57d7; }
 
-.hc-map-stage .leaflet-control-zoom a:hover {
-  color: #ffffff;
-  background: #7e57d7;
-}
-
-.hc-map-stage .leaflet-popup-content-wrapper {
-  color: #f5f1ff;
-  border-radius: 12px;
-  background: #2f1551;
+/* Popups */
+.hc-map-canvas .leaflet-popup-content-wrapper {
+  color: #f5f1ff; border-radius: 12px; background: #2f1551;
   box-shadow: 0 12px 22px rgba(26, 10, 47, 0.46);
 }
+.hc-map-canvas .leaflet-popup-tip { background: #2f1551; }
+.hc-map-canvas .leaflet-popup-content { margin: 12px 14px; line-height: 1.35; }
 
-.hc-map-stage .leaflet-popup-tip {
-  background: #2f1551;
-}
-
-.hc-map-stage .leaflet-popup-content {
-  margin: 12px 14px;
-  line-height: 1.35;
-}
-
-.hc-court-marker {
-  background: transparent;
-  border: 0;
-}
+/* ─── Court markers (generados por divIcon, fuera del árbol React) ─── */
+.hc-court-marker { background: transparent; border: 0; }
 
 .hc-court-marker__pin {
-  position: relative;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  border-radius: 999px;
+  position: relative; width: 48px; height: 48px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2px; border-radius: 999px;
   border: 1.6px solid rgba(148, 130, 165, 0.5);
-  color: #f3f2f3;
-  background: #542581;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  color: #f3f2f3; background: #542581;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
   transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
 }
-
 .hc-court-marker--selected .hc-court-marker__pin {
-  border-color: #fcb136;
-  background: #7e57d7;
-  transform: scale(1.06);
+  border-color: #fcb136; background: #7e57d7; transform: scale(1.06);
 }
+.hc-court-marker--selected .hc-court-marker__badge { background: #fcb136; }
 
 .hc-court-marker__label {
-  display: block;
-  min-width: 7px;
-  font-family: "Graphik", sans-serif;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 10px;
-  line-height: 15px;
-  text-align: center;
-  color: #f3f2f3;
+  display: block; min-width: 7px; font-family: "Graphik", sans-serif;
+  font-weight: 500; font-size: 10px; line-height: 15px;
+  text-align: center; color: #f3f2f3;
 }
-
 .hc-court-marker__badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  border: 1.6px solid #1a1a2e;
-  background: #22c55e;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-}
-
-.hc-court-marker--selected .hc-court-marker__badge {
-  background: #fcb136;
-}
-
-@media (max-width: 900px) {
-  .hc-map-chip-base {
-    padding: 10px 14px;
-    font-size: 0.95rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .hc-map-chip--city {
-    left: 14px;
-    top: 14px;
-  }
-
-  .hc-map-chip--location {
-    left: 14px;
-    bottom: 14px;
-  }
-
-  .hc-map-court-card-base {
-    padding: 10px 16px;
-    font-size: 0.94rem;
-  }
-
-  .hc-map-stage .leaflet-top.leaflet-left {
-    right: 12px;
-    bottom: 70px;
-  }
+  position: absolute; top: -4px; right: -4px;
+  width: 20px; height: 20px; border-radius: 999px;
+  border: 1.6px solid #1a1a2e; background: #22c55e;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.1);
 }
