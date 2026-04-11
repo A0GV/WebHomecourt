@@ -172,7 +172,7 @@ export default function Map() {
       </header>
 
       {/* Map stage */}
-      <div className="relative isolate">
+      <div className="relative isolate hc-map-stage">
         {/* Gradient overlay */}
         <div className="absolute inset-0 z-[320] pointer-events-none bg-[linear-gradient(180deg,rgba(17,6,26,0.3)_0%,rgba(0,0,0,0)_50%,rgba(17,6,26,0.5)_100%)]" />
 

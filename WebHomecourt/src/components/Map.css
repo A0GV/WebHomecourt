@@ -3,20 +3,41 @@
 
 /* Reposicionar zoom controls */
 .hc-map-stage .leaflet-top.leaflet-left {
-  top: auto; left: auto; right: 18px; bottom: 84px;
+  top: 50%;
+  right: 18px;
+  left: auto;
+  bottom: auto;
+  transform: translateY(-18%);
 }
 @media (max-width: 640px) {
-  .hc-map-stage .leaflet-top.leaflet-left { right: 12px; bottom: 70px; }
+  .hc-map-stage .leaflet-top.leaflet-left {
+    right: 12px;
+    left: auto;
+    transform: translateY(-12%);
+  }
 }
 
 .hc-map-canvas .leaflet-control-zoom { border: 0; box-shadow: none; margin: 0; }
 .hc-map-canvas .leaflet-control-zoom a {
-  width: 42px; height: 42px; line-height: 42px; margin: 8px 0 0;
-  border: 0.8px solid rgba(84, 37, 129, 0.5); border-radius: 14px;
-  color: #f3f2f3; background: rgba(59, 25, 92, 0.9);
-  box-shadow: 0 12px 20px rgba(32, 14, 55, 0.38);
+  align-items: center;
+  background-color: #3b195ce6;
+  border: 0.8px solid #54258180;
+  border-radius: 10px;
+  color: #f3f2f3;
+  display: flex;
+  font-size: 20px;
+  font-weight: 500;
+  height: 36px;
+  justify-content: center;
+  line-height: 1;
+  margin: 8px 0 0;
+  position: relative;
+  width: 36px;
 }
-.hc-map-canvas .leaflet-control-zoom a:hover { color: #fff; background: #7e57d7; }
+.hc-map-canvas .leaflet-control-zoom a:first-child,
+.hc-map-canvas .leaflet-control-zoom a:last-child {
+  border-radius: 10px;
+}
 
 /* Popups */
 .hc-map-canvas .leaflet-popup-content-wrapper {
