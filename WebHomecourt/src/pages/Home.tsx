@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
 import MarcadorActivo, {getMarcadorActivo, type MarcadorJuego} from '../components/Home/Marcador'
 import NextGame from '../components/Home/NextGame'
+import GameSummaryMiniGraph from '../components/Home/MiniStats'
 
 //Obtener el id del ultimo partido
 export async function getPastGameId(): Promise<number> {
@@ -72,14 +73,10 @@ function Home() {
     <div>
       <Nav current='Home'></Nav>
       {juego ? (
-<<<<<<< HEAD
-        <MarcadorActivo juego={juego}></MarcadorActivo>
-=======
         <section className="px-4 md:px-14 py-5 bg-zinc-100 w-full flex flex-col gap-6">
           <MarcadorActivo juego={juego} />
           <GameSummaryMiniGraph game_id={juego.game_id} refreshKey={miniStatsRefreshKey} pastGame={false}/>
         </section>
->>>>>>> d32436cb97eb09cedf2635b8ca76e6c8bb5e37f1
       ):(
         <section className="px-4 md:px-14 py-5 bg-zinc-100 w-full flex flex-col gap-6">
           <NextGame></NextGame>

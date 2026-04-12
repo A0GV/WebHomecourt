@@ -1,22 +1,3 @@
-<<<<<<< HEAD
-import { supabase } from "../../lib/supabase"
-import { useEffect, useState } from "react"
-
-export type MarcadorJuego = {
-  game_id: number;
-  lakers_name: string;
-  lakers_rebound: number;
-  opposing_team_name: string;
-  opposing_team_logo: string;
-  opposing_score: number;
-  home: boolean;
-  start_date: string;
-  seconds_elapsed: number;
-  current_quarter: number;
-  venue: string;
-  attended: number | null;
-};
-=======
 import { supabase } from "../../lib/supabase";
 import { useEffect, useState } from "react"
 import { BarChart, Bar, XAxis, YAxis, LabelList, ResponsiveContainer,} from "recharts";
@@ -179,4 +160,3 @@ function GameSummaryMiniGraph({ game_id, refreshKey = 0, pastGame }: GameSummary
   )
 }
 export default GameSummaryMiniGraph;
->>>>>>> d32436cb97eb09cedf2635b8ca76e6c8bb5e37f1
