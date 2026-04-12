@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Button from '../components/button.tsx'
 
 function Login() {
   const [username, setUsername] = useState('')
@@ -16,25 +17,75 @@ function Login() {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: '100px auto', textAlign: 'center' }}>
-      <h1>Login</h1>
-      <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input
-          type="text"
-          placeholder="Usuario"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
+    // Uses relative so that it calcs diff layout positions to this main div */}
+    <div className="relative min-h-screen bg-zinc-100 flex items-center justify-center overflow-hidden">
+      {/* Top right icon, dejando sin alt para q no disp nada si no se encuentra and absolute to set at aboslute top and abs right -0*/}
+      <img src="/top_right_login.png" alt="" className="absolute top-0 right-0 w-[20rem] md:w-[35rem]" />
+
+      {/* Bottom left decoration*/}
+      <img src="/bottom_left_login.png" alt="" className="absolute bottom-0 left-0 w-[15rem] md:w-[19rem]"
+      />
+
+      {/* Centered login card */}
+      <div className="relative flex flex-col items-center w-full max-w-sm px-8 py-10">
+        <img
+          src="/lakers_homecourt.png"
+          alt="Lakers Homecourt"
+          className="h-16 object-contain mb-6"
         />
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Entrar</button>
-      </form>
+
+        <h1 className="text-morado-lakers mb-1 text-center">Hi, Lakers fan!</h1>
+        <p className="text-gray-600 mb-6">So glad you're back.</p>
+
+        {/* Email/username */}
+        <form onSubmit={handleLogin} className="flex flex-col gap-4 w-full">
+          <div className="flex flex-col gap-1">
+            <label>Email or username</label>
+            <input
+              type="text"
+              placeholder="Enter your email or username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              className="h-11 px-4 bg-white rounded-2xl text-zinc-500 focus:outline-2 focus:outline-morado-lakers"
+            />
+          </div>
+
+          {/* Password */}
+          <div className="flex flex-col gap-1">
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="h-11 px-4 bg-white rounded-2xl text-zinc-500 focus:outline-2 focus:outline-morado-lakers"
+            />
+          </div>
+
+          <div className="flex justify-between items-center font-semibold">
+            <label className="flex items-center text-morado-lakers gap-2 ">
+              <input type="checkbox" className="accent-morado-lakers" />
+              Remember me
+            </label>
+            <a href="#" className="text-morado-bajo hover:text-morado-lakers">Forgot Password?</a>
+          </div>
+
+          <Button
+                  text="Sign-in"
+                  type="primary"
+                  onClick={() => {}}
+                  className="text-lg"
+            />
+        </form>
+
+        <p className="mt-6 text-morado-lakers font-semibold">
+          Already have an account?{' '}
+          <a href="#" className="text-morado-bajo font-semibold hover:underline">Sign Up Now</a>
+        </p>
+      </div>
+
     </div>
   )
 }

@@ -8,6 +8,7 @@ import LakersCourt from './pages/LakersCourt'
 import Juego from './pages/Juego'
 import Store from './pages/Store'
 import Perfil from './pages/Perfil'
+import Login from './pages/Login'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/juego" element={<Juego />} />
         <Route path="/store" element={<Store />} />
         <Route path="/perfil" element={<Perfil />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
     </BrowserRouter>
   )
