@@ -43,7 +43,7 @@ function Estadisticas({ game_id }: { game_id: number }) {
           </div>
           <RatioGraph stats={stats} />
         </div>
-        <div className='flex gap-6 pt-6 '>
+        <div className='flex center gap-6 pt-6 '>
           <PlayerStatsTable stats={stats} />
         </div>
       </div>
