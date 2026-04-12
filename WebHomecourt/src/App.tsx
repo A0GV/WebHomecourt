@@ -11,7 +11,7 @@ import Perfil from './pages/Perfil'
 import Login from './pages/Login'
 import Register from './pages/Register'
 // import { AuthContextProvider } from "../context/AuthContext.jsx"
-//import UserSession from './pages/UserSession' // Ejemplo usando sesión de usuairo
+import UserSession from './pages/UserSession' // Ejemplo usando sesión de usuairo
 
 function App() {
   return (
@@ -27,7 +27,7 @@ function App() {
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        {/*<Route path="/user-sesh" element={<UserSession />} /> */}
+        <Route path="/session" element={<UserSession />} /> 
       </Routes>
     </BrowserRouter>
   )

@@ -5,43 +5,28 @@ import { supabase } from "../lib/supabase"
 //import { UserAuth } from "../context/AuthContext.tsx";
 
 function Login() {
-  // Use https://www.youtube.com/watch?v=1KBV8M0mpYI nvm es con jsx y no sirve
-  const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState('') // Future allow username
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState(''); 
-  const navigate = useNavigate(); 
-
-  //const [user, setUser] = useState < any > null;
-
-  // For session info from tutorial
-  //const { session } = UserAuth();
-  //console.log(session);
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState(''); // Future allow username
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) { 
-      setError(error.message); 
-      console.log(`Error iniciando sesión`);
+    setError('');
+    setErrorMessage('');
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setError(error.message);
+      console.log(`Error iniciando sesión ${error.message}`);
+      setErrorMessage("Incorrect credentials");
     } else {
-      console.log(`Sí inició sesión`); 
-      navigate('/home');
+      console.log(`Sí inició sesión`);
+      setUser(data.user); // Sets the user data 
+      navigate('/session');
     }
-    //else setUser(data.user);
   };
-
-  /*
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // TODO: reemplaza esto con tu lógica de autenticación real
-    if (email && password) {
-      
-    }
-  }*/
 
   return (
     // Uses relative so that it calcs diff layout positions to this main div */}
@@ -65,7 +50,7 @@ function Login() {
         <p className="text-gray-600 mb-6">So glad you're back.</p>
 
         {/* Capture data, first email/username */}
-        <form onSubmit={handleLogin} className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-4 w-full">
           <div className="flex flex-col gap-1">
             <label>Email</label>
             <input
@@ -99,20 +84,20 @@ function Login() {
             <a href="#" className="text-morado-bajo hover:text-morado-lakers">Forgot Password?</a>
           </div>
 
+          
           <Button
-                  text="Sign-in"
-                  type="primary"
-                  onClick={() => {}}
-                  className="text-lg"
-            />
-        </form>
+            text="Sign-in"
+            type="primary"
+            onClick={handleLogin}
+            className="text-lg"
+          /> 
+        </div>
+        {/* Error display*/}
+        {errorMessage && <p className="text-red-600 mt-5 mb-1">{errorMessage}</p>}
 
-        <p className="mt-6 text-morado-lakers font-semibold">
-          Already have an account?{' '}
-          <a href="/register" className="text-morado-bajo font-semibold hover:underline">Sign Up Now</a>
-        </p>
+        <p className="mt-4 mb-2 text-morado-lakers font-semibold">Don't have an account yet?</p>
+        <a href="/register" className="text-morado-bajo font-semibold hover:text-morado-lakers">Sign Up Now</a>
       </div>
-
     </div>
   )
 }
