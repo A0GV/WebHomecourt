@@ -1,20 +1,47 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/button.tsx'
+import { supabase } from "../lib/supabase"
+//import { UserAuth } from "../context/AuthContext.tsx";
 
 function Login() {
-  const [username, setUsername] = useState('')
+  // Use https://www.youtube.com/watch?v=1KBV8M0mpYI nvm es con jsx y no sirve
+  const [loading, setLoading] = useState(false)
+  const [email, setEmail] = useState('') // Future allow username
   const [password, setPassword] = useState('')
-  const navigate = useNavigate()
+  const [error, setError] = useState(''); 
+  const navigate = useNavigate(); 
 
+  //const [user, setUser] = useState < any > null;
+
+  // For session info from tutorial
+  //const { session } = UserAuth();
+  //console.log(session);
+
+  const handleLogin = async () => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) { 
+      setError(error.message); 
+      console.log(`Error iniciando sesión`);
+    } else {
+      console.log(`Sí inició sesión`); 
+      navigate('/home');
+    }
+    //else setUser(data.user);
+  };
+
+  /*
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
 
     // TODO: reemplaza esto con tu lógica de autenticación real
-    if (username && password) {
-      navigate('/home')
+    if (email && password) {
+      
     }
-  }
+  }*/
 
   return (
     // Uses relative so that it calcs diff layout positions to this main div */}
@@ -37,15 +64,15 @@ function Login() {
         <h1 className="text-morado-lakers mb-1 text-center">Hi, Lakers fan!</h1>
         <p className="text-gray-600 mb-6">So glad you're back.</p>
 
-        {/* Email/username */}
+        {/* Capture data, first email/username */}
         <form onSubmit={handleLogin} className="flex flex-col gap-4 w-full">
           <div className="flex flex-col gap-1">
-            <label>Email or username</label>
+            <label>Email</label>
             <input
-              type="text"
-              placeholder="Enter your email or username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               className="h-11 px-4 bg-white rounded-2xl text-zinc-500 focus:outline-2 focus:outline-morado-lakers"
             />
@@ -56,7 +83,7 @@ function Login() {
             <label>Password</label>
             <input
               type="password"
-              placeholder="Enter your password"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -82,7 +109,7 @@ function Login() {
 
         <p className="mt-6 text-morado-lakers font-semibold">
           Already have an account?{' '}
-          <a href="#" className="text-morado-bajo font-semibold hover:underline">Sign Up Now</a>
+          <a href="/register" className="text-morado-bajo font-semibold hover:underline">Sign Up Now</a>
         </p>
       </div>
 
