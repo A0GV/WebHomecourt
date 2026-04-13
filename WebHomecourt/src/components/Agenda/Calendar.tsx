@@ -37,7 +37,7 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
     }
 
     return (
-        <div className="p-4">
+        <div className="p-1 md:p-4">
             {/* Header month and arrows */}
             <div className="flex items-center justify-between">
                 <h4 className="text-morado-lakers mb-1">{format(agendaDate, "MMMM yyyy")}</h4>
@@ -72,7 +72,7 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
                     const inCurrentMonth = isSameMonth(day, agendaDate); // Stores whether numeric day corresponds to month so that it only highlights the date if it's actually the same day y no nomas el 12 highlighted accross every month lol
 
                     // Construct cell styled fashion depending on event type 
-                    let cellStyle = "p-3.5 outline outline-1 outline-offset-[-1px] outline-gray-300 inline-flex flex-col justify-center items-center"
+                    let cellStyle = "p-2 md:p-3.5 outline outline-1 outline-offset-[-1px] outline-gray-300 inline-flex flex-col justify-center items-center"
 
                     // Check if game is home or not 
                     if (game?.home) {
