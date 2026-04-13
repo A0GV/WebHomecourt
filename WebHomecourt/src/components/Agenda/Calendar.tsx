@@ -42,15 +42,16 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
     //const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
     //const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
 
-    // Map game by local calendar day number
-    /*
+    // Map game to this calendar day number "date": GameItem
     const gamesByDateKey = new Map<string, GameItem>();
+
+    // 
     for (const game of games) {
         const gameDate = new Date(game.start_date);
         const key = format(gameDate, "yyyy-MM-dd");
-        gamesByDateKey.set(key, game);
+        gamesByDateKey.set(key, game); // Maps the key date to the game, so that way i reconstruct the calendar
+        console.log(`Mapped ${key} with ${game.game_id} on ${game.start_date}`)
     }
-    */
 
     return (
         <div className="p-5">
@@ -62,7 +63,7 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
             {/* Grid 6 rows 7 cols to have days and then the dates always working */}
             <div className="grid grid-cols-7">
                 {WEEKDAYS.map((day) => {
-                    return <div key={day} className="mt-2 font-semibold border">{day}</div>; // Can give days as key because none of the days repeat
+                    return <div key={day} className="mt-2 font-semibold">{day}</div>; // Can give days as key because none of the days repeat
                 })}
 
                 {/* Map to skip dates and compensate for month starting on a day that isn't Sunday, giving empty to avoid repeating index as below */}
@@ -75,9 +76,15 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
                     );
                 })}
 
-                {/* Render days in month, give key */}
+                {/* Render days in month, give key {games.filter((game) => isSameDay(game.start_date, day).map(game.game_id))} */}
                 {daysInMonth.map((day) => {
-                    return <div className="p-3.5 outline outline-1 outline-offset-[-1px] outline-gray-300 inline-flex flex-col justify-center items-center">{format(day, "d")}</div>;
+                    // To show the events or otherwise nothing
+                    const dateKey = format(day, "yyyy-MM-dd");
+                    return (
+                        <div className="p-3.5 outline outline-1 outline-offset-[-1px] outline-gray-300 inline-flex flex-col justify-center items-center">
+                            {format(day, "d")}
+                        </div>
+                    );
                 })}
 
                 {/* Map to skip dates and compensate for month starting on a day that isn't Sunday 
@@ -90,6 +97,20 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
                     );
                 })}
                 */}
+            </div>
+
+            {/* Legend w dates and such */}
+            <div className="mt-4 flex flex-col gap-2">
+                {/* Home */ }
+                <div className="inline-flex justify-start items-start gap-2.5 overflow-hidden">
+                    <div className="w-5 h-5 bg-amarillo-oscuro"></div>
+                    <div className="text-center justify-center text-black">Home</div>
+                </div>
+                {/* Away */ }
+                <div className="inline-flex justify-start items-start gap-2.5 overflow-hidden">
+                    <div className="w-5 h-5 bg-morado-oscuro"></div>
+                    <div className="text-center justify-center text-black">Away</div>
+                </div>
             </div>
 
         </div>
