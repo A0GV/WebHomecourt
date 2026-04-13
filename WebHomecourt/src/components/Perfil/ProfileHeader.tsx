@@ -1,7 +1,8 @@
 import { supabase } from "../../lib/supabase"
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 
-// Types
+// tipos
 export type ProfileData = {
     nickname: string
     photo_url: string | null
@@ -16,7 +17,7 @@ export type ProfileStats = {
     cardsCollected: number
 }
 
-// Query functions
+// funciones de los queries 
 export async function getProfileData(userId: string): Promise<ProfileData | null> {
     if (!userId) throw new Error("Invalid userId")
 
@@ -37,7 +38,7 @@ export async function getProfileData(userId: string): Promise<ProfileData | null
 export async function getProfileStats(userId: string): Promise<ProfileStats> {
     if (!userId) throw new Error("Invalid userId")
 
-    // Friends count - usando select normal en lugar de count
+    // friends count
     const { data: friendsData, error: friendsError } = await supabase
         .from("friendship")
         .select("friendship_id")
@@ -46,7 +47,7 @@ export async function getProfileStats(userId: string): Promise<ProfileStats> {
     if (friendsError) console.error("Friends error:", friendsError.message)
     console.log("Friends data:", friendsData)
 
-    // Events created
+    // events created
     const { data: eventsCreatedData, error: eventsCreatedError } = await supabase
         .from("event")
         .select("event_id")
@@ -54,7 +55,7 @@ export async function getProfileStats(userId: string): Promise<ProfileStats> {
 
     if (eventsCreatedError) console.error("Events created error:", eventsCreatedError.message)
 
-    // Events attended
+    // events attended
     const { data: eventsAttendedData, error: eventsAttendedError } = await supabase
         .from("event_participant")
         .select("event_participant_id")
@@ -63,7 +64,7 @@ export async function getProfileStats(userId: string): Promise<ProfileStats> {
     if (eventsAttendedError) console.error("Events attended error:", eventsAttendedError.message)
     console.log("Events attended data:", eventsAttendedData)
 
-    // Cards collected
+    // cards collected
     const { data: cardsData, error: cardsError } = await supabase
         .from("user_card")
         .select("card_id")
@@ -79,13 +80,14 @@ export async function getProfileStats(userId: string): Promise<ProfileStats> {
     }
 }
 
-// Stat Divider Component
+// stat divider componente
 function StatDivider() {
     return <div className="w-[1px] h-6 bg-[#9482A5] opacity-30"></div>
 }
 
-// Main Component
+// main componente
 function ProfileHeader({ userId }: { userId: string }) {
+    const navigate = useNavigate()
     const [profile, setProfile] = useState<ProfileData | null>(null)
     const [stats, setStats] = useState<ProfileStats | null>(null)
     const [loading, setLoading] = useState(true)
@@ -122,17 +124,17 @@ function ProfileHeader({ userId }: { userId: string }) {
 
     return (
         <div className="bg-morado-oscuro rounded-2xl p-6">
-            {/* Top Section: Photo, Name, Friends, Edit Button */}
+            {/* top section: photo, name, friends, edit button */}
             <div className="flex items-start justify-between mb-4">
-                {/* Left: Photo + Name + Friends */}
+                {/* left: photo + name + friends */}
                 <div className="flex items-center gap-4">
-                    {/* Profile Photo */}
+                    {/* pfp */}
                     <img
                         src={profile.photo_url || "/default-avatar.png"}
                         alt={profile.nickname}
                         className="w-[110px] h-[112px] rounded object-cover flex-shrink-0"
                     />
-                    {/* Name + Friends */}
+                    {/* name + friends */}
                     <div>
                         <h1 className="text-white text-4xl font-bold">
                             {profile.nickname}
@@ -146,8 +148,11 @@ function ProfileHeader({ userId }: { userId: string }) {
                     </div>
                 </div>
 
-                {/* Right: Edit Profile Button */}
-                <button className="flex items-center gap-2 bg-morado-bajo hover:bg-morado-bajo/80 text-white px-6 py-3 rounded-full transition-colors">
+                {/* right: edit profile button */}
+                <button
+                    onClick={() => navigate("/editar-perfil")}
+                    className="flex items-center gap-2 bg-morado-bajo hover:bg-morado-bajo/80 text-white px-6 py-3 rounded-full transition-colors"
+                >
                     <img src="/edit.svg" alt="Edit" className="w-5 h-5" />
                     <span className="text-lg font-medium">
                         Edit Profile
@@ -155,9 +160,9 @@ function ProfileHeader({ userId }: { userId: string }) {
                 </button>
             </div>
 
-            {/* Bottom Section: Stats Row */}
+            {/* bottom section: stats row */}
             <div className="flex items-center gap-4 mt-4">
-                {/* Reputation */}
+                {/* reputation */}
                 <div className="flex items-center gap-1">
                     <img src="/Star.svg" alt="Star" className="w-5 h-5" />
                     <span className="text-amarillo-lakers text-[22px]">
@@ -170,7 +175,7 @@ function ProfileHeader({ userId }: { userId: string }) {
 
                 <StatDivider />
 
-                {/* Credits */}
+                {/* credits */}
                 <div className="flex items-center gap-1">
                     <span className="text-[#F3F2F3] text-[22px]">
                         {profile.credits}
@@ -182,7 +187,7 @@ function ProfileHeader({ userId }: { userId: string }) {
 
                 <StatDivider />
 
-                {/* Events Created */}
+                {/* events created */}
                 <div className="flex items-center gap-1">
                     <span className="text-[#F3F2F3] text-[22px]">
                         {stats.eventsCreated}
@@ -194,7 +199,7 @@ function ProfileHeader({ userId }: { userId: string }) {
 
                 <StatDivider />
 
-                {/* Events Attended */}
+                {/* events attended */}
                 <div className="flex items-center gap-1">
                     <span className="text-[#F3F2F3] text-[22px]">
                         {stats.eventsAttended}
@@ -206,7 +211,7 @@ function ProfileHeader({ userId }: { userId: string }) {
 
                 <StatDivider />
 
-                {/* Cards Collected */}
+                {/* cards collected */}
                 <div className="flex items-center gap-1">
                     <span className="text-[#F3F2F3] text-[22px]">
                         {stats.cardsCollected}

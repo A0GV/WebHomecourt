@@ -72,7 +72,7 @@ a {
   text-decoration: underline;
 }
 
-/* Custom colors*/ 
+/* Custom colors*/
 @theme {
   --color-morado-oscuro:    #3B195C;
   --color-morado-lakers:    #542581;
@@ -80,4 +80,6 @@ a {
   --color-morado-disabled:  #AD96C3;
   --color-amarillo-oscuro:  #B36F00;
   --color-amarillo-lakers:  #FCB136;
+  --color-Background:       #F3F2F5;
+  --color-Gris-Oscuro:      #6F6975;
 }
