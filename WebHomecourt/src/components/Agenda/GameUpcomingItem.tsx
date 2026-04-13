@@ -51,7 +51,7 @@ function GameUpcoming({ games, currentDate }: GameProp) {
                   text="Watch"
                   type={isLive ? 'primary' : 'primarydisable'}
                   onClick={isLive ? () => { } : () => { }}
-                  className={"text-sm md:text-base w-full"}
+                  className={" w-full"}
                 />
               </div>
 
