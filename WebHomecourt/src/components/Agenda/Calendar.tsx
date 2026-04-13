@@ -44,13 +44,12 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
 
     // Map game to this calendar day number "date": GameItem
     const gamesByDateKey = new Map<string, GameItem>();
-
-    // 
+    
     for (const game of games) {
         const gameDate = new Date(game.start_date);
         const key = format(gameDate, "yyyy-MM-dd");
         gamesByDateKey.set(key, game); // Maps the key date to the game, so that way i reconstruct the calendar
-        console.log(`Mapped ${key} with ${game.game_id} on ${game.start_date}`)
+        //console.log(`Mapped ${key} with ${game.game_id} on ${game.start_date}`)
     }
 
     return (
@@ -58,6 +57,11 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
             {/* Header month and arrows */}
             <div className="flex items-center justify-between">
                 <h4 className="text-morado-lakers mb-1">{format(agendaDate, "MMMM yyyy")}</h4>
+
+                <div className="flex gap-5 text-2xl text-morado-lakers">
+                    <button onClick={() => onChangeMonth(subMonths(agendaDate, 1))}>&lt;</button>
+                    <button onClick={() => onChangeMonth(addMonths(agendaDate, 1))}>&gt;</button>
+                </div>
             </div>
 
             {/* Grid 6 rows 7 cols to have days and then the dates always working */}
@@ -91,7 +95,7 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
                         cellStyle += " bg-amarillo-oscuro text-white";
                     } else if (game && !game.home) {
                         cellStyle += " bg-morado-oscuro text-white"
-                    } 
+                    }
 
                     // Show current date
                     if (isToday(day) && inCurrentMonth) {
