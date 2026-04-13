@@ -36,8 +36,8 @@ export default function RatePlayersPanel({
         </p>
       </header>
 
-      <div className="bg-[#FDFDFD] border border-black/25 rounded-b-[15px] px-[50px] py-[20px] flex flex-col gap-[50px]">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[50px] items-center justify-center">
+      <div className="bg-[#FDFDFD] border border-black/25 rounded-b-[15px] px-12.5 py-5 flex flex-col gap-12.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12.5 items-center justify-center">
           {players.map((player) => (
             <RateCard
               key={player.id}
@@ -57,9 +57,9 @@ export default function RatePlayersPanel({
           text={submittingRatings ? "Enviando calificaciones..." : submitText}
           onClick={submitDisabled ? () => {} : onSubmit}
           className={[
-            "w-full h-[50px] rounded-[15px] px-0 py-0 text-[24px] leading-[26px] font-normal inline-flex items-center justify-center",
+            "w-full h-12.5 rounded-[15px] px-0 py-0 text-[24px] leading-6.5 font-normal inline-flex items-center justify-center",
             submitDisabled
-              ? "bg-[#542581]/50 outline-3 outline-[#542581]/50 text-[#A09CA4] cursor-not-allowed pointer-events-none"
+              ? "bg-morado-lakers/50 outline-3 outline-morado-lakers/50 text-[#A09CA4] cursor-not-allowed pointer-events-none"
               : "text-[#F3F2F3]",
           ].join(" ")}
         />
