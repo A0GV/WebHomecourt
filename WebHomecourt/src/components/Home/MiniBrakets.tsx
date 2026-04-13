@@ -27,23 +27,26 @@ function getDaysLeft(pregunta: MiniBrack | null): string | null {
 
 export async function getMiniBracket(): Promise<MiniBrack> {
   const { data, error } = await supabase
-  .from('bracket')
-  .select('*')
-  .lte('open_date', new Date().toISOString())
-  .gte('close_date', new Date().toISOString())
-  .is('winner', null);
-  // Smth died
+    .from('bracket')
+    .select('*')
+    .is('winner', null)
+    .order('open_date', { ascending: true });
+
   if (error) {
-    console.error("Supabase error:", error.message)
-    throw new Error("Failed to get minibackets")
+    console.error("Supabase error:", error.message);
+    throw new Error("Failed to get minibrackets");
   }
 
-  const normalizedData = Array.isArray(data) ? data[0] : data;
-  if (!normalizedData) {
-    throw new Error("No mini brackets found")
-  }
+  const now = new Date();
 
-  return normalizedData as MiniBrack
+  // Filtra en el cliente para evitar problemas de timezone
+  const active = (data as MiniBrack[]).find(b => 
+    new Date(b.open_date) <= now && new Date(b.close_date) >= now
+  );
+
+  if (!active) throw new Error("No active bracket found");
+
+  return active;
 }
 
 function MiniBrackets(){
