@@ -7,6 +7,11 @@ import type { LatLng, Map as LeafletMap } from "leaflet";
 import type { Court } from "../services/apiMAP";
 import { getCiudad, getCourts } from "../services/apiMAP";
 
+interface MapProps {
+  selectedCourtId?: number | null;
+  onCourtSelect?: (courtId: number) => void;
+}
+
 function getCourtIcon(label: number | string, isSelected = false) {
   return divIcon({
     className: `hc-court-marker${isSelected ? " hc-court-marker--selected" : ""}`,
@@ -118,14 +123,23 @@ function LocationMarker({ locateRequest, onCityChange }: {
   );
 }
 
-export default function Map() {
+export default function Map({ selectedCourtId: selectedCourtIdProp, onCourtSelect }: MapProps) {
   const fallbackPosition: [number, number] = [34.048408, -118.252957];
   const [courts, setCourts] = useState<Court[]>([]);
   const [error, setError] = useState<string>("");
   const [locateRequest, setLocateRequest] = useState(0);
   const [currentCity, setCurrentCity] = useState("Detectando ciudad...");
-  const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
+  const [selectedCourtIdState, setSelectedCourtIdState] = useState<number | null>(null);
   const [map, setMap] = useState<LeafletMap | null>(null);
+  const isControlled = selectedCourtIdProp !== undefined;
+  const selectedCourtId = isControlled ? selectedCourtIdProp : selectedCourtIdState;
+
+  const handleSelectCourt = (court: Court) => {
+    if (!isControlled) {
+      setSelectedCourtIdState(court.court_id);
+    }
+    onCourtSelect?.(court.court_id);
+  };
 
   useEffect(() => {
     async function loadCourts() {
@@ -191,7 +205,7 @@ export default function Map() {
             courts={courts}
             error={error}
             selectedCourtId={selectedCourtId}
-            onSelectCourt={(court) => setSelectedCourtId(court.court_id)}
+            onSelectCourt={handleSelectCourt}
           />
         </MapContainer>
 
@@ -217,7 +231,7 @@ export default function Map() {
             <button
               key={court.court_id}
               type="button"
-              onClick={() => setSelectedCourtId(court.court_id)}
+              onClick={() => handleSelectCourt(court)}
               className={[
                 "flex-none rounded-[14px] border px-6 py-3 text-[1.02rem] font-bold bg-white cursor-pointer transition-[transform,box-shadow,border-color,background-color,color] duration-[180ms] ease-in-out",
                 "hover:-translate-y-px hover:shadow-[0_8px_16px_rgba(45,23,72,0.16)]",

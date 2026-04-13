@@ -41,6 +41,8 @@ export type PendingRateResponse = {
   eventId: number
   eventName: string | null
   eventDate: string | null
+  courtName: string | null
+  courtDirection: string | null
   players: RatePlayer[]
 }
 
@@ -65,6 +67,30 @@ export async function getPendingRatingPlayers(): Promise<PendingRateResponse | n
 
   if (!pending) {
     return null
+  }
+
+  let courtName: string | null = null
+  let courtDirection: string | null = null
+
+  const { data: eventRow, error: eventError } = await supabase
+    .from('event')
+    .select('court_id')
+    .eq('event_id', pending.event_id)
+    .limit(1)
+    .maybeSingle()
+
+  if (!eventError && eventRow?.court_id !== null && eventRow?.court_id !== undefined) {
+    const { data: courtRow, error: courtError } = await supabase
+      .from('court')
+      .select('name, direction')
+      .eq('court_id', Number(eventRow.court_id))
+      .limit(1)
+      .maybeSingle()
+
+    if (!courtError) {
+      courtName = courtRow?.name ?? null
+      courtDirection = courtRow?.direction ?? null
+    }
   }
 
   const { data, error } = await supabase.rpc('get_players_played_with', {
@@ -111,6 +137,8 @@ export async function getPendingRatingPlayers(): Promise<PendingRateResponse | n
     eventId: pending.event_id,
     eventName: pending.event_name,
     eventDate: pending.event_date,
+    courtName,
+    courtDirection,
     players,
   }
 }

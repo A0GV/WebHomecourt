@@ -1,9 +1,7 @@
 import Nav from '../components/Nav'
 import Map from "../components/Map"
-import NewEvent from '../components/NewEvent'
-import ShowEvents from '../components/ShowEvents'
-import RateCard from '../components/RateCard'
-import JumboCard from '../components/JumboCard'
+import CourtTournaments from '../components/CourtTournaments'
+import RatePlayersPanel from '../components/RatePlayersPanel'
 import { useEffect, useState } from 'react'
 import { getPendingRatingPlayers, saveUserEventRating, type RatePlayer} from '../services/apiRate'
 
@@ -13,7 +11,9 @@ function LakersCourt() {
   const [submittingRatings, setSubmittingRatings] = useState(false)
   const [playersError, setPlayersError] = useState<string | null>(null)
   const [pendingUserEventId, setPendingUserEventId] = useState<number | null>(null)
+  const [pendingCourtSubtitle, setPendingCourtSubtitle] = useState('Cancha no disponible')
   const [selectedRatings, setSelectedRatings] = useState<Record<string, number>>({})
+  const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null)
   const allPlayersRated =
     players.length > 0 && players.every((player) => Boolean(selectedRatings[player.id]))
 
@@ -26,12 +26,19 @@ function LakersCourt() {
 
       if (!pendingRating) {
         setPendingUserEventId(null)
+        setPendingCourtSubtitle('Cancha no disponible')
         setPlayers([])
         setSelectedRatings({})
         return
       }
 
       setPendingUserEventId(pendingRating.userEventId)
+      const subtitleParts = [pendingRating.courtName, pendingRating.courtDirection].filter(
+        (value): value is string => Boolean(value && value.trim().length > 0)
+      )
+      setPendingCourtSubtitle(
+        subtitleParts.length > 0 ? subtitleParts.join(', ') : 'Cancha no disponible'
+      )
       setPlayers(pendingRating.players)
       setSelectedRatings((prevRatings) => {
         const nextRatings: Record<string, number> = {}
@@ -47,6 +54,7 @@ function LakersCourt() {
       })
     } catch (error) {
       setPendingUserEventId(null)
+      setPendingCourtSubtitle('Cancha no disponible')
       setPlayers([])
       setSelectedRatings({})
       setPlayersError(error instanceof Error ? error.message : 'Error al cargar jugadores')
@@ -97,44 +105,31 @@ function LakersCourt() {
         <Nav current="LakersCourt" />
       </div>
       <div className='px-14 py-5 bg-zinc-100 w-full '>
-        <div className="w-full h-[169.588px] shrink-0 self-stretch px-5 py-7 bg-[#3B195C] rounded-[16px] shadow-[0_20px_25px_-5px_rgba(0,0,0,0.10),0_8px_10px_-6px_rgba(0,0,0,0.10)] inline-flex flex-col justify-start items-start gap-3.5 overflow-hidden">
+        <div className="w-full h-[169.588px] shrink-0 self-stretch px-5 py-7 bg-morado-oscuro rounded-[16px] shadow-[0_20px_25px_-5px_rgba(0,0,0,0.10),0_8px_10px_-6px_rgba(0,0,0,0.10)] inline-flex flex-col justify-start items-start gap-3.5 overflow-hidden">
           <h1 className="justify-start text-zinc-100">Lakers Court</h1>
         </div>
         {loadingPlayers && <div className="p-5"><p>Cargando jugadores...</p></div>}
         {!loadingPlayers && playersError && <div className="p-5"><p>{playersError}</p></div>}
         {!loadingPlayers && players.length > 0 && <div className="p-5">
-          <JumboCard
-            title="Rate Players' Sportsmanship"
-            subtitle="Las Riveras Park, court 2"
+          <RatePlayersPanel
+            players={players}
+            subtitle={pendingCourtSubtitle}
             onSubmit={handleSubmitRatings}
-            submitText={submittingRatings ? 'Enviando calificaciones...' : 'Submit rating'}
             submitDisabled={submittingRatings || !allPlayersRated}
-          >
-            {players.map((player) => (
-              <RateCard
-                key={player.id}
-                id={player.id}
-                avatarUrl={player.avatarUrl}
-                playerName={player.playerName}
-                playerTag={player.playerTag}
-                initialRating={player.initialRating}
-                onReport={(id) => console.log('Reportado:', id)}
-                onRatingChange={handlePlayerRating}
-              />
-            ))}
-          </JumboCard>
+            submittingRatings={submittingRatings}
+            onRatingChange={handlePlayerRating}
+            onReportPlayer={(id) => console.log('Reportado:', id)}
+          />
         </div>}
-        <div>
-          <h1 className="text-2xl font-bold p-5">Events</h1>
-          <div className="flex items-center justify-center">
-          <NewEvent/>
-          <ShowEvents/>
-          </div>
-        </div>
         <div>
           <h1 className="text-2xl font-bold p-5">Basketball Fields Map</h1>
           <div className="flex items-center justify-center">
-          <Map />
+          <Map selectedCourtId={selectedCourtId} onCourtSelect={setSelectedCourtId} />
+          </div>
+        </div>
+        <div>
+          <div className="flex flex-col items-center justify-center px-5">
+          <CourtTournaments selectedCourtId={selectedCourtId} />
           </div>
         </div>
       </div>
