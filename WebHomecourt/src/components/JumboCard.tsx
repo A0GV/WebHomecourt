@@ -6,6 +6,7 @@ interface JumboCardProps {
   children: React.ReactNode;
   onSubmit?: () => void;
   submitText?: string;
+  submitDisabled?: boolean;
 }
 
 export default function JumboCard({
@@ -14,6 +15,7 @@ export default function JumboCard({
   children,
   onSubmit,
   submitText = "Submit rating",
+  submitDisabled = false,
 }: JumboCardProps) {
   return (
     <div className="w-full max-w-[1255px] mx-auto flex flex-col">
@@ -38,7 +40,8 @@ export default function JumboCard({
         {onSubmit && (
           <button
             onClick={onSubmit}
-            className="w-full h-[50px] flex justify-center items-center bg-[#542581]/50 rounded-[15px] transition-all hover:bg-[#542581]/70"
+            disabled={submitDisabled}
+            className="w-full h-[50px] flex justify-center items-center bg-[#542581]/50 rounded-[15px] transition-all hover:bg-[#542581]/70 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span className="text-[#A09CA4] text-[24px] leading-[26px] font-normal">
               {submitText}
