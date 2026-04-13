@@ -78,10 +78,28 @@ function AgendaCalendar({ agendaDate, games, onChangeMonth }: CalendarProp) {
 
                 {/* Render days in month, give key {games.filter((game) => isSameDay(game.start_date, day).map(game.game_id))} */}
                 {daysInMonth.map((day) => {
-                    // To show the events or otherwise nothing
+                    // To show the games based on dictionary
                     const dateKey = format(day, "yyyy-MM-dd");
+                    const game = gamesByDateKey.get(dateKey); 
+                    const inCurrentMonth = isSameMonth(day, agendaDate); // Stores whether numeric day corresponds to month so that it only highlights the date if it's actually the same day y no nomas el 12 highlighted accross every month lol
+
+                    // Construct cell styled fashion depending on event type 
+                    let cellStyle = "p-3.5 outline outline-1 outline-offset-[-1px] outline-gray-300 inline-flex flex-col justify-center items-center"
+
+                    // Check if game is home or not 
+                    if (game?.home) {
+                        cellStyle += " bg-amarillo-oscuro text-white";
+                    } else if (game && !game.home) {
+                        cellStyle += " bg-morado-oscuro text-white"
+                    } 
+
+                    // Show current date
+                    if (isToday(day) && inCurrentMonth) {
+                        cellStyle += " bg-morado-bajo"
+                    }
+
                     return (
-                        <div className="p-3.5 outline outline-1 outline-offset-[-1px] outline-gray-300 inline-flex flex-col justify-center items-center">
+                        <div className={cellStyle}>
                             {format(day, "d")}
                         </div>
                     );
