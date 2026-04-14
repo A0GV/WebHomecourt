@@ -15,6 +15,7 @@ import Register from './pages/Register'
 // import { AuthContextProvider } from "../context/AuthContext.jsx"
 import UserSession from './pages/UserSession' // Ejemplo usando sesión de usuairo
 import EventReportDetails from './pages/EventReportDetails'
+import EditarPerfil from './pages/EditarPerfil';
 
 function App() {
   return (
