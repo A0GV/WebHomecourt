@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../../lib/supabase'
 import { RealtimeChannel } from '@supabase/supabase-js'
 
 export type UserPresenceData = {
@@ -22,7 +22,7 @@ export function usePresence(currentUser: {
     useEffect(() => {
         if (!currentUser?.user_id) return
 
-        // Crear canal de presencia
+      
         const presenceChannel = supabase.channel('online-users', {
             config: { 
                 presence: { 
@@ -31,7 +31,7 @@ export function usePresence(currentUser: {
             }
         })
 
-        // Escuchar sincronización de presencia
+      
         presenceChannel
             .on('presence', { event: 'sync' }, () => {
                 const state = presenceChannel.presenceState()
@@ -54,7 +54,7 @@ export function usePresence(currentUser: {
             })
             .subscribe(async (status) => {
                 if (status === 'SUBSCRIBED') {
-                    // Anunciar mi presencia
+                
                     await presenceChannel.track({
                         user_id: currentUser.user_id,
                         nickname: currentUser.nickname || 'Usuario',
@@ -67,18 +67,18 @@ export function usePresence(currentUser: {
 
         setChannel(presenceChannel)
 
-        // Cleanup al desmontar
+  
         return () => {
             presenceChannel.unsubscribe()
         }
     }, [currentUser?.user_id, currentUser?.nickname, currentUser?.photo_url])
 
-    // Helper para verificar si un usuario está online
+
     const isUserOnline = (userId: string): boolean => {
         return userId in onlineUsers
     }
 
-    // Obtener lista de usuarios online
+  
     const getOnlineUserIds = (): string[] => {
         return Object.keys(onlineUsers)
     }
