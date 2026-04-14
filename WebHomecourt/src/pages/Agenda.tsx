@@ -71,11 +71,6 @@ function Agenda() {
   // All fetched games here
   const [allGames, setAllGames] = useState<GameItem[]>([]);
 
-  // Array for different games 
-  //const [pastGames, setPastGames] = useState<GameItem[]>([]);
-  //const [upcomingGames, setUpcomingGames] = useState<GameItem[]>([]);
-
-
   // Initial function to render
   useEffect(() => {
     // This code runs once after the initial render
