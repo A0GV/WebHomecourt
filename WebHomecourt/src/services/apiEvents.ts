@@ -14,6 +14,11 @@ export interface CourtTournament {
   allow_event: boolean;
 }
 
+export interface SkillLevel {
+  skill_level_id: number;
+  description: string;
+}
+
 type CourtTournamentRow = Omit<CourtTournament, "court_id" | "current_players"> & {
   court_id: number | string;
 };
@@ -21,6 +26,11 @@ type CourtTournamentRow = Omit<CourtTournament, "court_id" | "current_players"> 
 interface UserEventRow {
   event_id: number | null;
 }
+
+type SkillLevelRow = {
+  skill_level_id: number | string;
+  description: string;
+};
 
 export async function getCourtTournaments(): Promise<CourtTournament[]> {
   const { data, error } = await supabase
@@ -65,4 +75,22 @@ export async function getCourtTournaments(): Promise<CourtTournament[]> {
     ...row,
     current_players: playersCountByEvent.get(row.event_id) ?? 0,
   }));
+}
+
+export async function getSkillLevels(): Promise<SkillLevel[]> {
+  const { data, error } = await supabase
+    .from("skill_level")
+    .select("skill_level_id, description")
+    .order("skill_level_id", { ascending: true });
+
+  if (error) {
+    throw new Error("No se pudieron cargar los niveles de habilidad");
+  }
+
+  return ((data ?? []) as SkillLevelRow[])
+    .map((row) => ({
+      skill_level_id: Number(row.skill_level_id),
+      description: row.description,
+    }))
+    .filter((row) => !Number.isNaN(row.skill_level_id));
 }

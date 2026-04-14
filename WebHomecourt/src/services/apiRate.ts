@@ -22,9 +22,9 @@ type PlayedWithPlayer = {
 
 //para el rated_user_id que da user_event_raitirngs
 
-// type UserEventRatingRow = {
-//   rated_user_id: string
-// }
+type UserEventRatingRow = {
+  rated_user_id: string
+}
 
 //Pa el frnt
 export type RatePlayer = {
@@ -105,26 +105,29 @@ export async function getPendingRatingPlayers(): Promise<PendingRateResponse | n
     (player) => player.event_id === pending.event_id
   )
 
-  // const uniquePlayers = rows.reduce<PlayedWithPlayer[]>((acc, row) => {
-  //   if (acc.some((player) => player.user_id === row.user_id)) return acc
-  //   acc.push(row)
-  //   return acc
-  // }, [])
+  // Evita repetir cards y conflictos 409 cuando un jugador ya fue calificado en ese evento.
+  const uniquePlayers = rows.reduce<PlayedWithPlayer[]>((acc, row) => {
+    if (acc.some((player) => player.user_id === row.user_id)) return acc
+    acc.push(row)
+    return acc
+  }, [])
 
-  // const { data: ratedUsersData, error: ratedUsersError } = await supabase
-  //   .from('user_event_ratings')
-  //   .select('rated_user_id')
-  //   .eq('user_event_id', pending.user_event_id)
+  const { data: ratedUsersData, error: ratedUsersError } = await supabase
+    .from('user_event_ratings')
+    .select('rated_user_id')
+    .eq('user_event_id', pending.user_event_id)
 
-  // if (ratedUsersError) {
-  //   throw new Error('No se pudieron cargar las calificaciones existentes')
-  // }
+  if (ratedUsersError) {
+    throw new Error('No se pudieron cargar las calificaciones existentes')
+  }
 
-  // const ratedUsers = new Set<string>(
-  //   ((ratedUsersData ?? []) as UserEventRatingRow[]).map((row) => row.rated_user_id)
-  // )
+  const ratedUsers = new Set<string>(
+    ((ratedUsersData ?? []) as UserEventRatingRow[]).map((row) => row.rated_user_id)
+  )
 
-  const players = rows.map((player) => ({
+  const players = uniquePlayers
+    .filter((player) => !ratedUsers.has(player.user_id))
+    .map((player) => ({
     id: player.user_id,
     avatarUrl: player.photo_url || 'https://i.pravatar.cc/150',
     playerName: player.nickname || player.username || 'Jugador',
@@ -148,13 +151,30 @@ export async function saveUserEventRating(
   ratedUserId: string,
   rating: number
 ): Promise<void> {
-  const { error } = await supabase.from('user_event_ratings').insert({
-    user_event_id: userEventId,
-    rated_user_id: ratedUserId,
-    rating,
-  })
+  const { error } = await supabase.from('user_event_ratings').upsert(
+    {
+      user_event_id: userEventId,
+      rated_user_id: ratedUserId,
+      rating,
+    },
+    {
+      onConflict: 'user_event_id,rated_user_id',
+      ignoreDuplicates: true,
+    }
+  )
 
-  if (error && error.code !== '23505') {
+  if (error) {
     throw new Error('No se pudo guardar la calificacion')
+  }
+}
+
+export async function markUserEventAsRated(userEventId: number): Promise<void> {
+  const { error } = await supabase
+    .from('user_event')
+    .update({ rated_others: true })
+    .eq('user_event_id', userEventId)
+
+  if (error) {
+    throw new Error(`No se pudo actualizar rated_others: ${error.message}`)
   }
 }

@@ -3,7 +3,13 @@ import Map from "../components/Map"
 import CourtTournaments from '../components/CourtTournaments'
 import RatePlayersPanel from '../components/RatePlayersPanel'
 import { useEffect, useState } from 'react'
-import { getPendingRatingPlayers, saveUserEventRating, type RatePlayer} from '../services/apiRate'
+import {
+  getPendingRatingPlayers,
+  markUserEventAsRated,
+  saveUserEventRating,
+  type RatePlayer,
+} from '../services/apiRate'
+import { getCurrentUserReputation } from '../services/apiUser'
 
 function LakersCourt() {
   const [players, setPlayers] = useState<RatePlayer[]>([])
@@ -14,8 +20,21 @@ function LakersCourt() {
   const [pendingCourtSubtitle, setPendingCourtSubtitle] = useState('Cancha no disponible')
   const [selectedRatings, setSelectedRatings] = useState<Record<string, number>>({})
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null)
+  const [userReputation, setUserReputation] = useState<number | null>(null)
+  const [loadingReputation, setLoadingReputation] = useState(true)
   const allPlayersRated =
     players.length > 0 && players.every((player) => Boolean(selectedRatings[player.id]))
+
+  const loadUserReputation = async () => {
+    setLoadingReputation(true)
+
+    try {
+      const reputation = await getCurrentUserReputation()
+      setUserReputation(reputation)
+    } finally {
+      setLoadingReputation(false)
+    }
+  }
 
   const loadPendingRatings = async () => {
     setLoadingPlayers(true)
@@ -87,6 +106,7 @@ function LakersCourt() {
           saveUserEventRating(pendingUserEventId, player.id, selectedRatings[player.id])
         )
       )
+      await markUserEventAsRated(pendingUserEventId)
       await loadPendingRatings()
     } catch (error) {
       setPlayersError(error instanceof Error ? error.message : 'Error al guardar calificacion')
@@ -97,6 +117,7 @@ function LakersCourt() {
 
   useEffect(() => {
     loadPendingRatings()
+    loadUserReputation()
   }, [])
 
   return (
@@ -105,8 +126,29 @@ function LakersCourt() {
         <Nav current="LakersCourt" />
       </div>
       <div className='px-14 py-5 bg-zinc-100 w-full '>
-        <div className="w-full h-[169.588px] shrink-0 self-stretch px-5 py-7 bg-morado-oscuro rounded-2xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.10),0_8px_10px_-6px_rgba(0,0,0,0.10)] inline-flex flex-col justify-start items-start gap-3.5 overflow-hidden">
-          <h1 className="justify-start text-zinc-100">Lakers Court</h1>
+        <div className="w-full max-w-315 mx-auto min-h-[169.588px] shrink-0 self-stretch px-5 py-7 bg-morado-oscuro rounded-2xl shadow-[0_20px_25px_-5px_rgba(0,0,0,0.10),0_8px_10px_-6px_rgba(0,0,0,0.10)] flex flex-col gap-6 overflow-hidden md:flex-row md:items-center md:justify-between">
+          <div className="inline-flex items-center gap-4">
+            <img
+              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1YSBBAgbPAWr0ku6NAqV0yojAo5q9RrpLww&s"
+              alt="Lakers logo"
+              className="h-20 w-24 rounded-md bg-zinc-100 p-1 object-contain"
+            />
+            <div className="text-zinc-100">
+              <h1 className="justify-start text-zinc-100">LAKERS COURT</h1>
+              <p className="mt-2 text-xl text-zinc-300">Find courts and basketball events near you</p>
+            </div>
+          </div>
+          <div className="self-end text-right md:self-auto">
+            <p className="uppercase tracking-[0.15em] text-zinc-300 text-sm">YOUR REPUTATION</p>
+            <div className="mt-2 inline-flex items-center gap-2 text-amarillo-laker">
+              <span className="text-6xl leading-none text-amarillo-lakers">
+                {loadingReputation ? '...' : userReputation !== null ? userReputation.toFixed(1) : '--'}
+              </span>
+              <span className="material-symbols-outlined leading-none text-amarillo-lakers" style={{ fontSize: '100px' }}>
+                star
+              </span>
+            </div>
+          </div>
         </div>
         {loadingPlayers && <div className="p-5"><p>Cargando jugadores...</p></div>}
         {!loadingPlayers && playersError && <div className="p-5"><p>{playersError}</p></div>}
@@ -121,16 +163,12 @@ function LakersCourt() {
             onReportPlayer={(id) => console.log('Reportado:', id)}
           />
         </div>}
-        <div>
-          <h1 className="text-2xl font-bold p-5">Basketball Fields Map</h1>
-          <div className="flex items-center justify-center">
+        <div className="w-full max-w-315 mx-auto mt-10">
+          <h1 className="text-2xl font-bold pb-5">Basketball Fields Map</h1>
           <Map selectedCourtId={selectedCourtId} onCourtSelect={setSelectedCourtId} />
-          </div>
         </div>
-        <div>
-          <div className="flex flex-col items-center justify-center px-5">
+        <div className="w-full mt-15">
           <CourtTournaments selectedCourtId={selectedCourtId} />
-          </div>
         </div>
       </div>
     </div>
