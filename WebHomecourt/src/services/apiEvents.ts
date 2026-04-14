@@ -24,13 +24,31 @@ type CourtTournamentRow = Omit<CourtTournament, "court_id" | "current_players"> 
 };
 
 interface UserEventRow {
-  event_id: number | null;
+  event_id: number | string | null;
+}
+
+interface UserEventMembershipRow {
+  user_event_id: number;
+  rated_others: boolean | null;
 }
 
 type SkillLevelRow = {
   skill_level_id: number | string;
   description: string;
 };
+
+async function getCurrentUserId(): Promise<string> {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user?.id) {
+    throw new Error("No se pudo obtener el usuario actual");
+  }
+
+  return user.id;
+}
 
 export async function getCourtTournaments(): Promise<CourtTournament[]> {
   const { data, error } = await supabase
@@ -66,8 +84,9 @@ export async function getCourtTournaments(): Promise<CourtTournament[]> {
 
   if (!userEventsError) {
     ((userEventsData ?? []) as UserEventRow[]).forEach((row) => {
-      if (row.event_id === null) return;
-      playersCountByEvent.set(row.event_id, (playersCountByEvent.get(row.event_id) ?? 0) + 1);
+      const eventId = Number(row.event_id);
+      if (Number.isNaN(eventId)) return;
+      playersCountByEvent.set(eventId, (playersCountByEvent.get(eventId) ?? 0) + 1);
     });
   }
 
@@ -93,4 +112,95 @@ export async function getSkillLevels(): Promise<SkillLevel[]> {
       description: row.description,
     }))
     .filter((row) => !Number.isNaN(row.skill_level_id));
+}
+
+export async function getCurrentUserJoinedEventIds(eventIds: number[]): Promise<Set<number>> {
+  if (eventIds.length === 0) {
+    return new Set<number>();
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user?.id) {
+    return new Set<number>();
+  }
+
+  const { data, error } = await supabase
+    .from("user_event")
+    .select("event_id")
+    .eq("user_id", user.id)
+    .in("event_id", eventIds);
+
+  if (error) {
+    throw new Error("No se pudo cargar tus inscripciones");
+  }
+
+  const joinedEventIds = new Set<number>();
+  ((data ?? []) as UserEventRow[]).forEach((row) => {
+    const eventId = Number(row.event_id);
+    if (!Number.isNaN(eventId)) {
+      joinedEventIds.add(eventId);
+    }
+  });
+
+  return joinedEventIds;
+}
+
+export async function signUpTournament(eventId: number): Promise<void> {
+  const userId = await getCurrentUserId();
+
+  const { data: membershipData, error: membershipError } = await supabase
+    .from("user_event")
+    .select("user_event_id, rated_others")
+    .eq("event_id", eventId)
+    .eq("user_id", userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (membershipError) {
+    throw new Error(`No se pudo verificar tu inscripcion: ${membershipError.message}`);
+  }
+
+  const membership = membershipData as UserEventMembershipRow | null;
+  if (membership) {
+    if (membership.rated_others) {
+      const { error: updateError } = await supabase
+        .from("user_event")
+        .update({ rated_others: false })
+        .eq("user_event_id", membership.user_event_id);
+
+      if (updateError) {
+        throw new Error(`No se pudo actualizar tu inscripcion: ${updateError.message}`);
+      }
+    }
+
+    return;
+  }
+
+  const { error: insertError } = await supabase.from("user_event").insert({
+    event_id: eventId,
+    user_id: userId,
+    rated_others: false,
+  });
+
+  if (insertError) {
+    throw new Error(`No se pudo inscribir al evento: ${insertError.message}`);
+  }
+}
+
+export async function leaveTournament(eventId: number): Promise<void> {
+  const userId = await getCurrentUserId();
+
+  const { error } = await supabase
+    .from("user_event")
+    .delete()
+    .eq("event_id", eventId)
+    .eq("user_id", userId);
+
+  if (error) {
+    throw new Error(`No se pudo cancelar tu inscripcion: ${error.message}`);
+  }
 }

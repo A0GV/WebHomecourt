@@ -2,7 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { LuMapPin, LuPlus, LuSearch, LuTriangle, LuUsers } from "react-icons/lu";
 import NewEvent from "./NewEvent";
 import { getCourts, type Court } from "../services/apiMAP";
-import { getCourtTournaments, getSkillLevels, type CourtTournament, type SkillLevel } from "../services/apiEvents";
+import {
+  getCourtTournaments,
+  getCurrentUserJoinedEventIds,
+  getSkillLevels,
+  leaveTournament,
+  signUpTournament,
+  type CourtTournament,
+  type SkillLevel,
+} from "../services/apiEvents";
 import { useCourtTournamentFilters } from "../hooks/useCourtTournamentFilters";
 
 interface CourtTournamentsProps {
@@ -58,14 +66,18 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
   const [skillLevels, setSkillLevels] = useState<SkillLevel[]>([]);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [joinedEventIds, setJoinedEventIds] = useState<Set<number>>(new Set());
+  const [submittingEventId, setSubmittingEventId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadTournamentData() {
       setLoading(true);
-      setError(null);
+      setLoadError(null);
+      setActionError(null);
 
       try {
         const [eventsData, courtsData, skillLevelsData] = await Promise.all([
@@ -79,12 +91,27 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
         setTournaments(eventsData);
         setCourts(courtsData ?? []);
         setSkillLevels(skillLevelsData);
+
+        try {
+          const joinedIds = await getCurrentUserJoinedEventIds(
+            eventsData.map((event) => event.event_id)
+          );
+
+          if (!cancelled) {
+            setJoinedEventIds(joinedIds);
+          }
+        } catch {
+          if (!cancelled) {
+            setJoinedEventIds(new Set());
+          }
+        }
       } catch (loadError) {
         if (!cancelled) {
           setTournaments([]);
           setCourts([]);
           setSkillLevels([]);
-          setError(loadError instanceof Error ? loadError.message : "No se pudieron cargar los torneos");
+          setJoinedEventIds(new Set());
+          setLoadError(loadError instanceof Error ? loadError.message : "No se pudieron cargar los torneos");
         }
       } finally {
         if (!cancelled) {
@@ -135,6 +162,74 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
     selectedCourtId === null
       ? "Todas las canchas"
       : courtNamesById.get(selectedCourtId) ?? `Cancha ${selectedCourtId}`;
+
+  const handleToggleSignUp = async (
+    tournament: CourtTournament,
+    currentPlayers: number,
+    safeMaxPlayers: number
+  ) => {
+    const eventId = tournament.event_id;
+    const isJoined = joinedEventIds.has(eventId);
+    const isFull = safeMaxPlayers === 0 || currentPlayers >= safeMaxPlayers;
+
+    if (!isJoined && isFull) {
+      setActionError("Este evento ya esta lleno");
+      return;
+    }
+
+    setSubmittingEventId(eventId);
+    setActionError(null);
+
+    try {
+      if (isJoined) {
+        await leaveTournament(eventId);
+        setJoinedEventIds((prev) => {
+          const next = new Set(prev);
+          next.delete(eventId);
+          return next;
+        });
+
+        setTournaments((prev) =>
+          prev.map((item) =>
+            item.event_id === eventId
+              ? { ...item, current_players: Math.max(0, item.current_players - 1) }
+              : item
+          )
+        );
+
+        return;
+      }
+
+      await signUpTournament(eventId);
+      setJoinedEventIds((prev) => {
+        const next = new Set(prev);
+        next.add(eventId);
+        return next;
+      });
+
+      setTournaments((prev) =>
+        prev.map((item) =>
+          item.event_id === eventId
+            ? {
+                ...item,
+                current_players:
+                  item.max_players > 0
+                    ? Math.min(item.max_players, item.current_players + 1)
+                    : item.current_players + 1,
+              }
+            : item
+        )
+      );
+    } catch (toggleError) {
+      setActionError(
+        toggleError instanceof Error
+          ? toggleError.message
+          : "No se pudo actualizar la inscripcion en el evento"
+      );
+    } finally {
+      setSubmittingEventId(null);
+    }
+  };
 
   return (
     <div className="w-full max-w-313.75 mx-auto flex flex-col gap-3.75">
@@ -258,6 +353,10 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
         </div>
       ) : null}
 
+      {actionError ? (
+        <div className="text-[13px] leading-[19.5px] text-red-600">{actionError}</div>
+      ) : null}
+
       <div className="flex-1 min-h-0 overflow-y-auto">
         {loading ? (
           <div className="h-full min-h-62.5 rounded-[14px] border-[0.8px] border-[#E7E6E8] bg-[#F3F2F5] flex items-center justify-center">
@@ -265,13 +364,13 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
           </div>
         ) : null}
 
-        {!loading && error ? (
+        {!loading && loadError ? (
           <div className="h-full min-h-62.5 rounded-[14px] border-[0.8px] border-[#E7E6E8] bg-[#F3F2F5] flex items-center justify-center">
-            <div className="text-red-600 text-base font-semibold">{error}</div>
+            <div className="text-red-600 text-base font-semibold">{loadError}</div>
           </div>
         ) : null}
 
-        {!loading && !error && filteredTournaments.length === 0 ? (
+        {!loading && !loadError && filteredTournaments.length === 0 ? (
           <div className="h-full min-h-62.5 rounded-[14px] border-[0.8px] border-[#E7E6E8] bg-[#F3F2F5] flex items-center justify-center">
             <div className="text-[#6F6975] text-base font-semibold">
               {selectedCourtId === null
@@ -281,7 +380,7 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
           </div>
         ) : null}
 
-        {!loading && !error && filteredTournaments.length > 0 ? (
+        {!loading && !loadError && filteredTournaments.length > 0 ? (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-3.75 pr-1 pb-1">
             {filteredTournaments.map((tournament) => {
               const courtName = courtNamesById.get(tournament.court_id) ?? `Cancha ${tournament.court_id}`;
@@ -290,6 +389,17 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
               const currentPlayers = Math.min(tournament.current_players, safeMaxPlayers);
               const fillPercent =
                 safeMaxPlayers > 0 ? Math.min(100, (currentPlayers / safeMaxPlayers) * 100) : 0;
+              const isJoined = joinedEventIds.has(tournament.event_id);
+              const isSubmitting = submittingEventId === tournament.event_id;
+              const isFull = safeMaxPlayers === 0 || currentPlayers >= safeMaxPlayers;
+              const isButtonDisabled = isSubmitting || (!isJoined && isFull);
+              const signUpLabel = isSubmitting
+                ? "..."
+                : isJoined
+                ? "UNSUBSCRIBE"
+                : isFull
+                ? "FULL"
+                : "SIGN UP";
 
               return (
                 <article
@@ -339,9 +449,17 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
                     <div className="mt-3 flex items-center gap-2.5">
                       <button
                         type="button"
-                        className="h-11 flex-1 rounded-xl bg-morado-lakers text-[#F3F2F3] text-[13px] leading-[19.5px] font-medium shadow-[0_4px_6px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] cursor-pointer"
+                        onClick={() => handleToggleSignUp(tournament, currentPlayers, safeMaxPlayers)}
+                        disabled={isButtonDisabled}
+                        className={[
+                          "h-11 flex-1 rounded-xl text-[13px] leading-[19.5px] font-medium shadow-[0_4px_6px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] transition-colors",
+                          isJoined
+                            ? "bg-[#E7E6E8] text-morado-lakers cursor-pointer"
+                            : "bg-morado-lakers text-[#F3F2F3] cursor-pointer",
+                          !isJoined && isFull ? "bg-[#D6D4D8] text-[#8A8690] cursor-not-allowed shadow-none" : "",
+                        ].join(" ")}
                       >
-                        SIGN UP
+                        {signUpLabel}
                       </button>
                       <button
                         type="button"
