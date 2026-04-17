@@ -1,5 +1,3 @@
-import React from 'react';
-
 // Prop for button
 interface ButtonProp {
     type?: 'primary' | 'secondary' | 'tertiary' | 'primary-disabled' | 'secondary-disabled' | 'tertiary-disabled'; // Add more if needed, will be string recieving type 
