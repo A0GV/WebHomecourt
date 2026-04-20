@@ -24,3 +24,8 @@ dist-ssr
 
 #Database API
 .env
+
+supabase
+dist
+.vercel
+.env*.local
