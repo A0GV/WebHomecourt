@@ -62,7 +62,7 @@ function formatCreatorLabel(userId: string): string {
 }
 
 export default function CourtTournaments({ selectedCourtId }: CourtTournamentsProps) {
-  const { user } = useAuth();
+  useAuth();
   const [tournaments, setTournaments] = useState<CourtTournament[]>([]);
   const [courts, setCourts] = useState<Court[]>([]);
   const [skillLevels, setSkillLevels] = useState<SkillLevel[]>([]);
@@ -280,7 +280,7 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
                 />
               </div>
 
-              <p className="text-[13px] leading-[19.5px] text-[#11061A] whitespace-nowrap">{`${currentMinAge} - ${currentMaxAge}`}</p>
+              <p className="text-[13px] leading-[19.5px] text-[#11061A] whitespace-nowrap">{`${currentMinAge ?? '0'} - ${currentMaxAge ?? '-'}`}</p>
             </div>
           </div>
 
