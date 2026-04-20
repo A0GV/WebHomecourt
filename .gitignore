@@ -1,3 +1,4 @@
 schema.sql
 seed.sql
 supabase/
+dist/
