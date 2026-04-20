@@ -19,7 +19,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr create \
-            --repo A0GV/WebHomecourt \
             --base QA \
             --head dev \
             --title "chore: promote dev → QA" \
