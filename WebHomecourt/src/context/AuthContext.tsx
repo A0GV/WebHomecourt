@@ -7,10 +7,8 @@ import { supabase } from "../lib/supabase";
 interface AuthContextType {
   session: Session | null; // Sesión actualizada del usuario autenticado
   user: User | null; // Información del usuario autenticado
-  userType: number | null; 
-  nickname: string | null;
-  photoUrl: string | null;
-  loading: boolean; 
+  userType: number | null; // NUEVOOO: Rol del usuario: null = visitante, 0 = usuario normal, 1 = admin
+  loading: boolean; // NUEVOOO: espera a que supabase confirme si hay sesión antes de cargar pantalla
   signIn: (email: string, password: string) => Promise<{ error: any } | undefined>; // Función para iniciar sesión
   signOut: () => Promise<void>; // Función para cerrar sesión
 }
@@ -28,10 +26,8 @@ type RequireSessionProps = {
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [userType, setUserType] = useState<number | null>(null); // Empieza en null hasta obtener el rol del usuario
-  const [nickname, setNickname] = useState<string | null>(null);
-  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // Empieza en true hasta que supabase confirme si hay sesión activa o no
+  const [userType, setUserType] = useState<number | null>(null); // NUEVOOO: Empieza en null hasta obtener el rol del usuario
+  const [loading, setLoading] = useState(true); // NUEVOOO: Empieza en true hasta que supabase confirme si hay sesión activa o no
 
   const fetchUserData = (userId: string) => {
     supabase
@@ -51,10 +47,18 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setUser(data.session?.user ?? null);
-      setLoading(false); 
+      setLoading(false); // NUEVOOO: no espera el query de userType
 
+      // NUEVOOO: corre en background sin bloquear render
       if (data.session?.user) {
-        fetchUserData(data.session.user.id);
+        supabase
+          .from('user_laker')
+          .select('user_type')
+          .eq('user_id', data.session.user.id)
+          .single()
+          .then(({ data: userData }) => {
+            setUserType(userData?.user_type ?? null);
+          });
       }
     });
 
@@ -63,11 +67,16 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        fetchUserData(session.user.id);
+        supabase
+          .from('user_laker')
+          .select('user_type')
+          .eq('user_id', session.user.id)
+          .single()
+          .then(({ data: userData }) => {
+            setUserType(userData?.user_type ?? null);
+          });
       } else {
         setUserType(null);
-        setNickname(null);
-        setPhotoUrl(null);
       }
     });
 
@@ -89,7 +98,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, userType, nickname, photoUrl, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ session, user, userType, loading, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   );
