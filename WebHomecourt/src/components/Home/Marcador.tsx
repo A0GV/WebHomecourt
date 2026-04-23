@@ -74,6 +74,7 @@ type MarcadorActivoProps = {
 //Componente de marcador
 function MarcadorActivo({juego}:MarcadorActivoProps){
   
+  //uso isLive para que cheque si el partido no esta en vivo, y que no aparezca Live game o el tiempo avanzando
   const isLive = juego.game_end_time == null;
   const segundos = useContadorTiempo(juego?.start_date);
 
@@ -117,10 +118,12 @@ function MarcadorActivo({juego}:MarcadorActivoProps){
               </div>
               <hr className="w-full h-0.5 bg-yellow-700" />
               <div className="w-full flex justify-between items-center px-2 gap-2">
-                <div className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-violet-950 text-sm">history</span>
-                  <p className="text-violet-950 text-[10px] md:text-xs">{segundos} elapsed</p>
-                </div>
+                {isLive && (
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-violet-950 text-sm">history</span>
+                    <p className="text-violet-950 text-[10px] md:text-xs">{segundos} elapsed</p>
+                  </div>
+                  )}
                 <div className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-violet-950 text-sm">location_on</span>
                   <p className="text-violet-950 text-[10px] md:text-xs">{juego?.venue ?? "Not found"}</p>

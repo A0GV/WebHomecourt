@@ -29,6 +29,18 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [userType, setUserType] = useState<number | null>(null); // NUEVOOO: Empieza en null hasta obtener el rol del usuario
   const [loading, setLoading] = useState(true); // NUEVOOO: Empieza en true hasta que supabase confirme si hay sesión activa o no
 
+  const fetchUserData = (userId: string) => {
+    supabase
+      .from('user_laker')
+      .select("user_type, nickname, photo_url")
+      .eq('user_id', userId)
+      .single()
+      .then(({ data }) => {
+        setUserType(data?.user_type ?? null);
+        setNickname(data?.nickname ?? null);
+        setPhotoUrl(data?.photo_url ?? null);
+      });
+  };
   // Obtiene sesion actual y escucha cambios de autenticacion
   useEffect(() => {
     // Sesion actual de Supabase
