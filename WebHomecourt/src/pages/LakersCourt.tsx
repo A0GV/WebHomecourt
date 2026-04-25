@@ -1,9 +1,9 @@
 import Nav from '../components/Nav'
-import Map from "../components/Map"
-import CourtTournaments from '../components/CourtTournaments'
-import RatePlayersPanel from '../components/RatePlayersPanel'
+import Map from "../components/LakerCourt/Map"
+import CourtTournaments from '../components/LakerCourt/CourtTournaments'
+import RatePlayersPanel from '../components/LakerCourt/RatePlayersPanel'
 import YourActivityCard from '../components/YourActivityCard'
-import ActiveModerationCard from '../components/ActiveModerationCard'
+import ActiveModerationCard from '../components/LakerCourt/ActiveModerationCard'
 import { useEffect, useState } from 'react'
 import {
   getPendingRatingPlayers,

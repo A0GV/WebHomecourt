@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { LuMapPin, LuPlus, LuSearch, LuTriangle, LuUsers } from "react-icons/lu";
-import { getCourts, type Court } from "../services/apiMAP";
+import { getCourts, type Court } from "../../services/apiMAP";
 import {
   getCourtTournaments,
   getCurrentUserJoinedEventIds,
@@ -9,10 +9,11 @@ import {
   signUpTournament,
   type CourtTournament,
   type SkillLevel,
-} from "../services/apiEvents";
-import { useCourtTournamentFilters } from "../hooks/useCourtTournamentFilters";
-import { useAuth } from "../context/AuthContext";
+} from "../../services/apiEvents";
+import { useCourtTournamentFilters } from "../../hooks/useCourtTournamentFilters";
+import { useAuth } from "../../hooks/Perfil/useAuth";
 import CrearEvento from "./CreateEvent";
+import ReportEventPopUp from "./ReportEvent";
 
 
 interface CourtTournamentsProps {
@@ -57,14 +58,12 @@ function formatTournamentDateParts(value: string | null): TournamentDateParts {
   };
 }
 
-function formatCreatorLabel(userId: string): string {
-  if (!userId) return "Usuario";
-  return `Usuario${userId.slice(0, 5)}`;
-}
+
 
 export default function CourtTournaments({ selectedCourtId }: CourtTournamentsProps) {
   useAuth();
   const [tournaments, setTournaments] = useState<CourtTournament[]>([]);
+  const [reportEventTarget, setReportEventTarget] = useState<{ id: number; name: string } | null>(null)
   const [courts, setCourts] = useState<Court[]>([]);
   const [skillLevels, setSkillLevels] = useState<SkillLevel[]>([]);
   const [open,SetOpen] = useState<boolean>(false)
@@ -442,7 +441,7 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
                     </div>
 
                     <div className="mt-3 border-b-[0.8px] border-[#E7E6E8] pb-3 text-[12px] leading-4.5 text-Gris-Oscuro">
-                      Created by: <span className="text-morado-lakers">{formatCreatorLabel(tournament.created_user_id)}</span>
+                      Created by: <span>{tournament.creator_nickname ?? 'Jugador'}</span>
                     </div>
 
                     <div className="mt-3 flex items-center gap-2.5">
@@ -469,6 +468,7 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
                       </button>
                       <button
                         type="button"
+                        onClick={() => setReportEventTarget({ id: tournament.event_id, name: tournament.event_name })}
                         className="h-11 w-11 rounded-xl border-[0.8px] border-amarillo-lakers/30 bg-amarillo-lakers/15 text-amarillo-lakers flex items-center justify-center cursor-pointer"
                         aria-label="Reportar evento"
                       >
@@ -484,6 +484,13 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
         </div>
       </div>
       </section>
+      {reportEventTarget && (
+        <ReportEventPopUp
+        eventId={reportEventTarget.id}
+        eventName={reportEventTarget.name}
+        onClose={() => setReportEventTarget(null)}
+        />
+        )}
     </div>
   );
 }

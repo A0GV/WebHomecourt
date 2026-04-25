@@ -5,6 +5,7 @@ export interface CourtTournament {
   event_name: string; // Nombre del evento.
   date: string | null; // Fecha/hora del evento (puede venir null).
   created_user_id: string; // Usuario que creo el evento.
+  creator_nickname: string;
   court_id: number; // ID de la cancha.
   max_players: number; // Cupo maximo permitido.
   current_players: number; // Jugadores inscritos actualmente.

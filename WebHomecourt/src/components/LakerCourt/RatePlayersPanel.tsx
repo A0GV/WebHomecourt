@@ -1,8 +1,8 @@
 import { useState } from "react";
 import RateCard from "./RateCard";
-import Button from "./button";
+import Button from ".././button";
 import RportPopUp from "./ReportPlayer";
-import type { RatePlayer } from "../services/apiRate";
+import type { RatePlayer } from "../../services/apiRate";
 
 interface RatePlayersPanelProps {
   players: RatePlayer[];
@@ -27,7 +27,6 @@ export default function RatePlayersPanel({
   submitText = "Submit rating",
   eventId,
 }: RatePlayersPanelProps) {
-  // Estado del modal de reporte
   const [reportTarget, setReportTarget] = useState<{
     playerId: string;
     playerName: string;

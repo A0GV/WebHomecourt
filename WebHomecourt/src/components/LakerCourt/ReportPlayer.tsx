@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
-import { useAuth } from "../context/AuthContext";
+import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../context/AuthContext";
+import StatusAlert from "../Messages/StatusAlert";
 
 interface ReportType {
   report_id: number;
   report_type: string;
 }
 
-interface ReportPlayerModalProps {
+interface ReportPlayerPopUpProps {
   eventId: number;
   reportedUserId: string;
   reportedUserName: string;
@@ -15,32 +16,7 @@ interface ReportPlayerModalProps {
   onSuccess?: () => void;
 }
 
-async function submitUReport(
-  userId: string,
-  eventId: number,
-  reportedUserId: string,
-  reportTypeId: number,
-  description: string
-): Promise<void> {
-  const { error } = await supabase.from("user_report").insert([
-    {
-      event_id: eventId,
-      reported_user_id: reportedUserId,
-      reporter_user_id: userId,
-      comment: description,
-      report_type: reportTypeId,
-    },
-  ]);
-  if (error) throw error;
-}
-
-export default function RportPopUp({
-  eventId,
-  reportedUserId,
-  reportedUserName,
-  onClose,
-  onSuccess,
-}: ReportPlayerModalProps) {
+export default function RportPopUp({eventId,reportedUserId,reportedUserName,onClose,onSuccess,}: ReportPlayerPopUpProps) {
   const { user } = useAuth();
 
   const [reportTypes, setReportTypes] = useState<ReportType[]>([]);
@@ -52,26 +28,23 @@ export default function RportPopUp({
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    const fetchReportTypes = async () => {
-      setLoadingTypes(true);
-      const { data, error } = await supabase
-        .from("report_type")
-        .select("report_id, report_type")
-        .order("report_id");
-      if (!error && data) setReportTypes(data as ReportType[]);
-      setLoadingTypes(false);
-    };
-    fetchReportTypes();
+    supabase
+      .from("report_type")
+      .select("report_id, report_type")
+      .order("report_id")
+      .then(({ data, error }) => { //En vez de hacer una funciona asincronica, con el then ua es el callback y ps como su npombre lo indica, lo hace despues ajja
+        if (!error && data) setReportTypes(data as ReportType[]); 
+        setLoadingTypes(false);
+      });
   }, []);
 
-  // Bloquear scroll al abrir
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, []);
+  // useEffect(() => {
+  //   document.body.style.overflow = "hidden";
+  //   return () => { document.body.style.overflow = ""; };
+  // }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); //Es para que cuando se haga el submit, no se recarge sola, pq si no, la pagina da refresh antes de que se envie
     setError(null);
 
     if (!user) { setError("Debes iniciar sesión para reportar."); return; }
@@ -80,7 +53,15 @@ export default function RportPopUp({
 
     setIsSubmitting(true);
     try {
-      await submitUReport(user.id, eventId, reportedUserId, selectedTypeId, description);
+      const { error } = await supabase.from("user_report").insert([{
+        event_id: eventId,
+        reported_user_id: reportedUserId,
+        reporter_user_id: user.id,
+        comment: description,
+        report_type: selectedTypeId,
+      }]);
+      if (error) throw error;
+
       setSuccess(true);
       setTimeout(() => { onSuccess?.(); onClose(); }, 1500);
     } catch (err: unknown) {
@@ -92,14 +73,8 @@ export default function RportPopUp({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
-      <div className="relative z-10 w-full max-w-md rounded-[20px] bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-md rounded-[20px] bg-white shadow-2xl overflow-hidden">
 
         {/* Header */}
         <div className="px-6 py-5 bg-morado-oscuro">
@@ -115,11 +90,7 @@ export default function RportPopUp({
                 <p className="text-sm text-purple-300">{reportedUserName}</p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors"
-            >
+            <button type="button" onClick={onClose} className="rounded-full bg-white/10 p-1.5 text-white hover:bg-white/20 transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -127,9 +98,9 @@ export default function RportPopUp({
           </div>
         </div>
 
-        {/* Info alert */}
+        {/* Alert */}
         <div className="mx-6 mt-5 rounded-xl bg-purple-50 border border-purple-100 p-3.5 flex gap-2.5 items-start">
-          <svg className="w-4 h-4 text-purple-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
           </svg>
           <p className="text-sm text-gray-600 leading-snug">
@@ -139,19 +110,13 @@ export default function RportPopUp({
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
-
           {/* Report Type */}
           <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-2.5">
-              Report Type
-            </label>
+            <label className="block text-sm font-semibold text-gray-800 mb-2.5">Report Type</label>
             {loadingTypes ? (
               <div className="grid grid-cols-2 gap-2">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="h-10 rounded-lg bg-gray-100 animate-pulse" />
-                ))}
+                {[...Array(6)].map((_, i) => <div key={i} className="h-10 rounded-lg bg-gray-100 animate-pulse" />)}
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
@@ -187,38 +152,14 @@ export default function RportPopUp({
             />
           </div>
 
-          {/* Error */}
-          {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              {error}
-            </p>
-          )}
+          {error && ( <StatusAlert tone="error" title={error} /> )}
+          {success && ( <StatusAlert tone="success" title="¡Reporte enviado correctamente!" />)}
 
-          {/* Success */}
-          {success && (
-            <p className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 flex items-center gap-2">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              ¡Reporte enviado correctamente!
-            </p>
-          )}
-
-          {/* Buttons */}
           <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
-            >
+            <button type="button" onClick={onClose} disabled={isSubmitting} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || !selectedTypeId || !description.trim()}
-              className="flex-1 px-4 py-3 bg-morado-lakers text-white rounded-xl text-sm font-medium hover:bg-morado-oscuro transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
-            >
+            <button type="submit" disabled={isSubmitting || !selectedTypeId || !description.trim()} className="flex-1 px-4 py-3 bg-morado-lakers text-white rounded-xl text-sm font-medium hover:bg-morado-oscuro transition-colors disabled:opacity-40 flex items-center justify-center gap-2">
               {isSubmitting ? (
                 <>
                   <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">

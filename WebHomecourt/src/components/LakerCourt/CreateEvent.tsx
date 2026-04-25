@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
-import { getSkillLevels, type SkillLevel } from "../services/apiEvents";
-import { getCourts, type Court } from "../services/apiMAP";
+import { getSkillLevels, type SkillLevel } from "../../services/apiEvents";
+import { getCourts, type Court } from "../../services/apiMAP";
+import StatusAlert from "../Messages/StatusAlert";
 
 interface propsPopup {
   open: boolean;
@@ -42,6 +43,8 @@ async function createEvent(event: DatosEvento) {
 }
 
 export default function CrearEvento ({open, onClose}: propsPopup){
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
     const [courts, setCourts] = useState<Court[] | null>(null);
     console.log(courts);
     const navigate = useNavigate()
@@ -67,6 +70,7 @@ export default function CrearEvento ({open, onClose}: propsPopup){
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target as HTMLInputElement
 
+    //Sirve para poder actualizar los datos en especifico de una parte sin perder todo
     setFormData((prev) => ({
       ...prev,
       [name]: type === "number" ? Number(value) : value
@@ -75,15 +79,16 @@ export default function CrearEvento ({open, onClose}: propsPopup){
 
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-     console.log("FormData:", formData)
+    setError(null)
+    setSuccess(false)
     try {
       await createEvent(formData)
-      alert("Event created!")
+      setSuccess(true)
     //   window.location.reload() Es mejor el navigate pq no recarga desde 0 la pagina
       navigate(0)
     // onClose()
     } catch {
-      alert("Error creating event")
+      setError("No se pudo crear el evento. Intenta de nuevo.")
     }
   }
 
@@ -232,6 +237,8 @@ export default function CrearEvento ({open, onClose}: propsPopup){
               </div>
 
               {/* Buttons */}
+              {error && <StatusAlert tone="error" title={error} />}
+              {success && <StatusAlert tone="success" title="¡Evento creado correctamente!" />}
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
