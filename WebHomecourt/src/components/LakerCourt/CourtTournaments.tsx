@@ -1,61 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { LuMapPin, LuPlus, LuSearch, LuTriangle, LuUsers } from "react-icons/lu";
+import { LuPlus, LuSearch} from "react-icons/lu";
 import { getCourts, type Court } from "../../services/apiMAP";
-import {
-  getCourtTournaments,
-  getCurrentUserJoinedEventIds,
-  getSkillLevels,
-  leaveTournament,
-  signUpTournament,
-  type CourtTournament,
-  type SkillLevel,
-} from "../../services/apiEvents";
+import {getCourtTournaments,getCurrentUserJoinedEventIds,getSkillLevels,leaveTournament,signUpTournament,type CourtTournament,type SkillLevel,} from "../../services/apiEvents";
 import { useCourtTournamentFilters } from "../../hooks/useCourtTournamentFilters";
 import { useAuth } from "../../hooks/Perfil/useAuth";
 import CrearEvento from "./CreateEvent";
 import ReportEventPopUp from "./ReportEvent";
-
+import StatusAlert from "../Messages/StatusAlert";
+import TournamentCard from "./TournamentCard";
 
 interface CourtTournamentsProps {
   selectedCourtId: number | null;
-}
-
-interface TournamentDateParts {
-  dateLabel: string;
-  timeLabel: string;
-}
-
-function formatTournamentDateParts(value: string | null): TournamentDateParts {
-  if (!value) {
-    return {
-      dateLabel: "Por definir",
-      timeLabel: "--:--",
-    };
-  }
-
-  const parsedDate = new Date(value);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return {
-      dateLabel: "Por definir",
-      timeLabel: "--:--",
-    };
-  }
-
-  const dateLabelRaw = new Intl.DateTimeFormat("es-MX", {
-    day: "2-digit",
-    month: "short",
-  }).format(parsedDate);
-
-  return {
-    dateLabel: dateLabelRaw.replace(".", ""),
-    timeLabel: value.includes("T")
-      ? new Intl.DateTimeFormat("es-MX", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }).format(parsedDate)
-      : "--:--",
-  };
 }
 
 
@@ -66,7 +21,7 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
   const [reportEventTarget, setReportEventTarget] = useState<{ id: number; name: string } | null>(null)
   const [courts, setCourts] = useState<Court[]>([]);
   const [skillLevels, setSkillLevels] = useState<SkillLevel[]>([]);
-  const [open,SetOpen] = useState<boolean>(false)
+  const [open, SetOpen] = useState<boolean>(false)
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -137,23 +92,7 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
     [courts]
   );
 
-  const {
-    searchValue,
-    setSearchValue,
-    setSelectedMinAge,
-    setSelectedMaxAge,
-    skillLevelFilter,
-    setSkillLevelFilter,
-    minAvailableAge,
-    maxAvailableAge,
-    currentMinAge,
-    currentMaxAge,
-    minThumbPercent,
-    maxThumbPercent,
-    skillFilterOptions,
-    filteredTournaments,
-    getSkillLabel,
-  } = useCourtTournamentFilters({
+  const filters = useCourtTournamentFilters({
     tournaments,
     selectedCourtId,
     courtNamesById,
@@ -213,12 +152,12 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
         prev.map((item) =>
           item.event_id === eventId
             ? {
-                ...item,
-                current_players:
-                  item.max_players > 0
-                    ? Math.min(item.max_players, item.current_players + 1)
-                    : item.current_players + 1,
-              }
+              ...item,
+              current_players:
+                item.max_players > 0
+                  ? Math.min(item.max_players, item.current_players + 1)
+                  : item.current_players + 1,
+            }
             : item
         )
       );
@@ -248,53 +187,53 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
                 <div
                   className="absolute top-2.25 h-1.5 rounded-full bg-morado-lakers"
                   style={{
-                    left: `${minThumbPercent}%`,
-                    right: `${100 - maxThumbPercent}%`,
+                    left: `${filters.minThumbPercent}%`,
+                    right: `${100 - filters.maxThumbPercent}%`,
                   }}
                 />
 
                 <input
                   type="range"
-                  min={minAvailableAge}
-                  max={maxAvailableAge}
-                  value={currentMinAge}
+                  min={filters.minAvailableAge}
+                  max={filters.maxAvailableAge}
+                  value={filters.currentMinAge}
                   disabled={tournaments.length === 0}
                   onChange={(event) => {
                     const nextValue = Number(event.target.value);
-                    setSelectedMinAge(Math.min(nextValue, currentMaxAge));
+                    filters.setSelectedMinAge(Math.min(nextValue, filters.currentMaxAge));
                   }}
                   className="pointer-events-none absolute left-0 top-0 h-6 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-[1.6px] [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-morado-lakers [&::-webkit-slider-thumb]:shadow-[0_4px_6px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-[1.6px] [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-morado-lakers"
                 />
 
                 <input
                   type="range"
-                  min={minAvailableAge}
-                  max={maxAvailableAge}
-                  value={currentMaxAge}
+                  min={filters.minAvailableAge}
+                  max={filters.maxAvailableAge}
+                  value={filters.currentMaxAge}
                   disabled={tournaments.length === 0}
                   onChange={(event) => {
                     const nextValue = Number(event.target.value);
-                    setSelectedMaxAge(Math.max(nextValue, currentMinAge));
+                    filters.setSelectedMaxAge(Math.max(nextValue, filters.currentMinAge));
                   }}
                   className="pointer-events-none absolute left-0 top-0 h-6 w-full appearance-none bg-transparent [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-[1.6px] [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:bg-morado-lakers [&::-webkit-slider-thumb]:shadow-[0_4px_6px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-[1.6px] [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:bg-morado-lakers"
                 />
               </div>
 
-              <p className="text-[13px] leading-[19.5px] text-[#11061A] whitespace-nowrap">{`${currentMinAge ?? '0'} - ${currentMaxAge ?? '-'}`}</p>
+              <p className="text-[13px] leading-[19.5px] text-[#11061A] whitespace-nowrap">{`${filters.currentMinAge ?? '0'} - ${filters.currentMaxAge ?? '-'}`}</p>
             </div>
           </div>
 
           <div className="bg-Background rounded-xl px-4 pt-3 pb-2.5">
             <p className="text-[12px] leading-4.5 font-medium text-Gris-Oscuro">Skill Level</p>
             <div className="mt-1 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {skillFilterOptions.map((skillOption) => {
-                const isActive = skillLevelFilter === skillOption.value;
+              {filters.skillFilterOptions.map((skillOption) => {
+                const isActive = filters.skillLevelFilter === skillOption.value;
 
                 return (
                   <button
                     key={skillOption.value}
                     type="button"
-                    onClick={() => setSkillLevelFilter(skillOption.value)}
+                    onClick={() => filters.setSkillLevelFilter(skillOption.value)}
                     className={[
                       "h-6.5 rounded-lg px-3 text-[12px] leading-4.5 font-medium whitespace-nowrap",
                       isActive
@@ -329,168 +268,77 @@ export default function CourtTournaments({ selectedCourtId }: CourtTournamentsPr
         </header>
 
         <div className="bg-white border-[0.8px] border-black/8 rounded-b-[15px] px-6 py-3.75 flex-1 min-h-0 flex flex-col gap-3.75">
-        <CrearEvento open={open} onClose={()=> SetOpen(false)}></CrearEvento>
+          <CrearEvento open={open} onClose={() => SetOpen(false)}></CrearEvento>
 
-        <label className="relative block h-11.25 w-full max-w-md">
-          <LuSearch
-            size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgba(17,6,26,0.5)]"
-          />
-          <input
-            type="text"
-            placeholder="Search courts, events..."
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            className="h-full w-full rounded-2xl border-[0.8px] border-[#E7E6E8] bg-white pl-10 pr-4 text-[16px] text-[#11061A] outline-none"
-          />
-        </label>
+          <label className="relative block h-11.25 w-full max-w-md">
+            <LuSearch
+              size={18}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[rgba(17,6,26,0.5)]"
+            />
+            <input
+              type="text"
+              placeholder="Search courts, events..."
+              value={filters.searchValue}
+              onChange={(event) => filters.setSearchValue(event.target.value)}
+              className="h-full w-full rounded-2xl border-[0.8px] border-[#E7E6E8] bg-white pl-10 pr-4 text-[16px] text-[#11061A] outline-none"
+            />
+          </label>
 
-      {selectedCourtId !== null ? (
-        <div className="text-[13px] leading-[19.5px] text-Gris-Oscuro">
-          Mostrando torneos de <span className="text-morado-lakers">{selectedCourtName}</span>
-        </div>
-      ) : null}
+          {selectedCourtId !== null ? (
+            <div className="text-[13px] leading-[19.5px] text-Gris-Oscuro">
+              Mostrando torneos de <span className="text-morado-lakers">{selectedCourtName}</span>
+            </div>
+          ) : null}
 
-      {actionError ? (
-        <div className="text-[13px] leading-[19.5px] text-red-600">{actionError}</div>
-      ) : null}
+          {actionError && <StatusAlert tone="error" title={actionError} />}
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        {loading ? (
-          <div className="h-full min-h-62.5 rounded-[14px] border-[0.8px] border-[#E7E6E8] bg-Background flex items-center justify-center">
-            <div className="text-morado-lakers text-base font-semibold">Cargando torneos...</div>
-          </div>
-        ) : null}
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {loading ? (
+              <div className="h-full min-h-62.5 rounded-[14px] border-[0.8px] border-[#E7E6E8] bg-Background flex items-center justify-center">
+                <div className="text-morado-lakers text-base font-semibold">Cargando torneos...</div>
+              </div>
+            ) : null}
 
-        {!loading && loadError ? (
-          <div className="h-full min-h-62.5 rounded-[14px] border-[0.8px] border-[#E7E6E8] bg-Background flex items-center justify-center">
-            <div className="text-red-600 text-base font-semibold">{loadError}</div>
-          </div>
-        ) : null}
+            {!loading && loadError ? (
+              <div className="h-full min-h-62.5 rounded-[14px] border-[0.8px] border-[#E7E6E8] bg-Background flex items-center justify-center">
+                <div className="text-red-600 text-base font-semibold">{loadError}</div>
+              </div>
+            ) : null}
 
-        {!loading && !loadError && filteredTournaments.length === 0 ? (
-          <div className="h-full min-h-62.5 rounded-[14px] border-[0.8px] border-[#E7E6E8] bg-Background flex items-center justify-center">
-            <div className="text-Gris-Oscuro text-base font-semibold">
-              {selectedCourtId === null
-                ? "Inicia sesion pra ver los torneos"
-                : `No hay torneos para ${selectedCourtName}`}
+            {!loading && !loadError && filters.filteredTournaments.length === 0 ? (
+              <div className="h-full min-h-62.5 rounded-[14px] border-[0.8px] border-[#E7E6E8] bg-Background flex items-center justify-center">
+                <div className="text-Gris-Oscuro text-base font-semibold">
+                  {selectedCourtId === null
+                    ? "Inicia sesion para ver los torneos"
+                    : `No hay torneos para ${selectedCourtName}`}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-3.75 pr-1 pb-1">
+              {filters.filteredTournaments.map((tournament) => (
+                <TournamentCard
+                  key={tournament.event_id}
+                  tournament={tournament}
+                  courtName={courtNamesById.get(tournament.court_id) ?? `Cancha ${tournament.court_id}`}
+                  isJoined={joinedEventIds.has(tournament.event_id)}
+                  isSubmitting={submittingEventId === tournament.event_id}
+                  getSkillLabel={filters.getSkillLabel}
+                  onSignUp={handleToggleSignUp}
+                  onReport={() => setReportEventTarget({ id: tournament.event_id, name: tournament.event_name })}
+                />
+              ))}
             </div>
           </div>
-        ) : null}
-
-        {!loading && !loadError && filteredTournaments.length > 0 ? (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-x-5 gap-y-3.75 pr-1 pb-1">
-            {filteredTournaments.map((tournament) => {
-              const courtName = courtNamesById.get(tournament.court_id) ?? `Cancha ${tournament.court_id}`;
-              const { dateLabel, timeLabel } = formatTournamentDateParts(tournament.date);
-              const safeMaxPlayers = Math.max(0, tournament.max_players);
-              const currentPlayers = Math.min(tournament.current_players, safeMaxPlayers);
-              const fillPercent =
-                safeMaxPlayers > 0 ? Math.min(100, (currentPlayers / safeMaxPlayers) * 100) : 0;
-              const isJoined = joinedEventIds.has(tournament.event_id);
-              const isSubmitting = submittingEventId === tournament.event_id;
-              const isFull = safeMaxPlayers === 0 || currentPlayers >= safeMaxPlayers;
-              const isButtonDisabled = isSubmitting || (!isJoined && isFull);
-              const signUpLabel = isSubmitting
-                ? "..."
-                : isJoined
-                ? "UNSUBSCRIBE"
-                : isFull
-                ? "FULL"
-                : "SIGN UP";
-
-              return (
-                <article
-                  key={tournament.event_id}
-                  className="min-h-62.5 rounded-[14px] bg-Background border-[0.8px] border-transparent px-5 pt-5 pb-5.25"
-                >
-                  <div className="flex flex-col">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="text-[16px] leading-6 font-normal text-[#11061A] ">
-                          {tournament.event_name}
-                        </div>
-                        <div className="mt-2 flex items-center gap-1.5 text-[12px] leading-4.5 text-Gris-Oscuro">
-                          <LuMapPin size={12} />
-                          {courtName}
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-[14px] leading-5.25 text-[#11061A]">{dateLabel}</div>
-                        <div className="text-[12px] leading-4.5 text-Gris-Oscuro">{timeLabel}</div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between text-[13px] leading-[19.5px]">
-                        <span className="text-Gris-Oscuro">Players</span>
-                        <span className="text-[#11061A]">
-                          {currentPlayers}/{safeMaxPlayers}
-                        </span>
-                      </div>
-                      <div className="h-2 w-full rounded-full bg-[#E7E6E8] overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-[linear-gradient(90deg,#542581_0%,#FCB136_100%)]"
-                          style={{ width: `${fillPercent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-4 border-b-[0.8px] border-[#E7E6E8] pb-3 text-[12px] leading-4.5 text-Gris-Oscuro">
-                      Age: <span className="text-morado-lakers">{`${tournament.min_age}-${tournament.max_age}`}</span> | Skill level: <span className="text-morado-lakers">{getSkillLabel(tournament.skill_level_id)}</span>
-                    </div>
-
-                    <div className="mt-3 border-b-[0.8px] border-[#E7E6E8] pb-3 text-[12px] leading-4.5 text-Gris-Oscuro">
-                      Created by: <span>{tournament.creator_nickname ?? 'Jugador'}</span>
-                    </div>
-
-                    <div className="mt-3 flex items-center gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleSignUp(tournament, currentPlayers, safeMaxPlayers)}
-                        disabled={isButtonDisabled}
-                        className={[
-                          "h-11 flex-1 rounded-xl text-[13px] leading-[19.5px] font-medium shadow-[0_4px_6px_rgba(0,0,0,0.1),0_2px_4px_rgba(0,0,0,0.1)] transition-colors",
-                          isJoined
-                            ? "bg-[#E7E6E8] text-morado-lakers cursor-pointer"
-                            : "bg-morado-lakers text-[#F3F2F3] cursor-pointer",
-                          !isJoined && isFull ? "bg-[#D6D4D8] text-[#8A8690] cursor-not-allowed shadow-none" : "",
-                        ].join(" ")}
-                      >
-                        {signUpLabel}
-                      </button>
-                      <button
-                        type="button"
-                        className="h-11 w-11 rounded-xl bg-[#E7E6E8] text-morado-lakers flex items-center justify-center cursor-pointer"
-                        aria-label="Ver jugadores"
-                      >
-                        <LuUsers size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setReportEventTarget({ id: tournament.event_id, name: tournament.event_name })}
-                        className="h-11 w-11 rounded-xl border-[0.8px] border-amarillo-lakers/30 bg-amarillo-lakers/15 text-amarillo-lakers flex items-center justify-center cursor-pointer"
-                        aria-label="Reportar evento"
-                      >
-                        <LuTriangle size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        ) : null}
         </div>
-      </div>
       </section>
       {reportEventTarget && (
         <ReportEventPopUp
-        eventId={reportEventTarget.id}
-        eventName={reportEventTarget.name}
-        onClose={() => setReportEventTarget(null)}
+          eventId={reportEventTarget.id}
+          eventName={reportEventTarget.name}
+          onClose={() => setReportEventTarget(null)}
         />
-        )}
+      )}
     </div>
   );
 }

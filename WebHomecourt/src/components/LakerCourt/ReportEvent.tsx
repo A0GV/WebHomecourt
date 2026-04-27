@@ -113,11 +113,6 @@ export default function ReportEventPopUp({eventId,eventName,onClose,onSuccess,}:
           {/* Report Type */}
           <div>
             <label className="block text-sm font-semibold text-gray-800 mb-2.5">Report Type</label>
-            {loadingTypes ? (
-              <div className="grid grid-cols-2 gap-2">
-                {[...Array(6)].map((_, i) => <div key={i} className="h-10 rounded-lg bg-gray-100 animate-pulse" />)}
-              </div>
-            ) : (
               <div className="grid grid-cols-2 gap-2">
                 {reportTypes.map((type) => (
                   <button
@@ -134,10 +129,9 @@ export default function ReportEventPopUp({eventId,eventName,onClose,onSuccess,}:
                   </button>
                 ))}
               </div>
-            )}
+            
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-sm font-semibold text-gray-800 mb-2.5">
               Description <span className="text-red-500">*</span>

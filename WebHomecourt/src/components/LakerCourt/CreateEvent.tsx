@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getSkillLevels, type SkillLevel } from "../../services/apiEvents";
 import { getCourts, type Court } from "../../services/apiMAP";
 import StatusAlert from "../Messages/StatusAlert";
-
+import { useAuth } from "../../context/AuthContext";
 interface propsPopup {
   open: boolean;
   onClose: () => void;
@@ -19,6 +19,7 @@ interface DatosEvento {
     min_age: number | "";
     max_age: number | "";
     skill_level_id: number | null | "";
+    female_event: boolean;
 }
 
 async function createEvent(event: DatosEvento) {
@@ -30,6 +31,7 @@ async function createEvent(event: DatosEvento) {
     max_age:        event.max_age       !== "" ? Number(event.max_age)        : null,
     max_players:    event.max_players   !== "" ? Number(event.max_players)    : null,
     skill_level_id: (event.skill_level_id !== "" && event.skill_level_id !== null) ? Number(event.skill_level_id) : null,
+    female_event: event.female_event,
   }
 
   const { error } = await supabase
@@ -43,28 +45,35 @@ async function createEvent(event: DatosEvento) {
 }
 
 export default function CrearEvento ({open, onClose}: propsPopup){
+  const [skillLevels, setSkillLevels] = useState<SkillLevel[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-    const [courts, setCourts] = useState<Court[] | null>(null);
-    console.log(courts);
-    const navigate = useNavigate()
-    const [formData, setFormData] = useState<DatosEvento>({
-        event_name: "",
-        court_id: "",
-        date: "",
-        time: "",
-        max_players: "",
-        min_age: "",
-        max_age: "",
-        skill_level_id: null,
-    });
-    
-    useEffect(()=>{
-        const loadCourts = async() => {
-            const data = await getCourts();
-            setCourts(data);
-        };
-        loadCourts();
+  const [courts, setCourts] = useState<Court[] | null>(null);
+  console.log(courts);
+  const navigate = useNavigate()
+  const user = useAuth();
+  const [formData, setFormData] = useState<DatosEvento>({
+      event_name: "",
+      court_id: "",
+      date: "",
+      time: "",
+      max_players: "",
+      min_age: "",
+      max_age: "",
+      skill_level_id: null,
+      female_event: false,
+  });
+  
+    useEffect(() => {
+      const loadData = async () => {
+        const [courtsData, skillLevelsData] = await Promise.all([
+          getCourts(),
+          getSkillLevels(),
+        ])
+        setCourts(courtsData);
+        setSkillLevels(skillLevelsData);
+      };
+      loadData()
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -222,20 +231,34 @@ export default function CrearEvento ({open, onClose}: propsPopup){
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Skill Level
                   </label>
-                  <select
-                    name="skill_level_id"
-                    value={formData.skill_level_id ?? ""}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white"
-                  >
-                    <option value="">Any</option>
-                    <option value="1">Beginner</option>
-                    <option value="2">Intermediate</option>
-                    <option value="3">Advanced</option>
-                  </select>
+                  
+                    {/* {console.log("skillLevels:", skillLevels)} */}
+                    <select
+                      name="skill_level_id"
+                      value={formData.skill_level_id ?? ""}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white"
+                    >
+                      {/* <option value="">Any</option> */}
+                      {skillLevels.map((level) => (
+                        <option key={level.skill_level_id} value={level.skill_level_id}>
+                          {level.description}
+                        </option>
+                      ))}
+                    </select>
+                  
                 </div>
               </div>
 
+              {user.gender===0 && (
+                <div className="flex items-center gap-2.5">
+                  <input type="checkbox" id="female_event" checked={formData.female_event}
+                   onChange={(e) => setFormData(prev => ({ ...prev, female_event: e.target.checked }))} className="w-4 h-4 accent-morado-lakers cursor-pointer"/>
+                  <label htmlFor="female_event" className="text-sm font-medium text-gray-700 cursor-pointer">
+                    Women only event
+                  </label>
+                </div>
+                  )}
               {/* Buttons */}
               {error && <StatusAlert tone="error" title={error} />}
               {success && <StatusAlert tone="success" title="¡Evento creado correctamente!" />}
