@@ -1,4 +1,3 @@
-import React from "react";
 import { LuMapPin, LuTriangle, LuUsers } from "react-icons/lu";
 import type { CourtTournament } from "../../services/apiEvents";
 

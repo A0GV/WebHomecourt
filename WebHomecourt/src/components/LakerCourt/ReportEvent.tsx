@@ -19,7 +19,6 @@ export default function ReportEventPopUp({eventId,eventName,onClose,onSuccess,}:
   const { user } = useAuth();
 
   const [reportTypes, setReportTypes] = useState<ReportType[]>([]);
-  const [loadingTypes, setLoadingTypes] = useState(true);
   const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,7 +32,6 @@ export default function ReportEventPopUp({eventId,eventName,onClose,onSuccess,}:
       .order("report_id")
       .then(({ data, error }) => {
         if (!error && data) setReportTypes(data as ReportType[]);
-        setLoadingTypes(false);
       });
   }, []);
 
