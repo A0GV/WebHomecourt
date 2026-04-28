@@ -3,7 +3,7 @@ import ConfirmModal from './ConfirmPopup'
 import WarningPopup from './WarningPopup'
 
 interface ActionButtonsProps {
-  onDismiss: () => void 
+  onDismiss: () => void
   onWarning: (warnTypeId: number, customMessage: string | null) => void
   onSuspend: () => void
   onBan: () => void
