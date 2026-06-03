@@ -84,10 +84,35 @@ a {
   --color-amarillo-lakers:  #FCB136;
   --color-Background:       #F3F2F5;
   --color-Gris-Oscuro:      #6F6975;
-  --color-disabled:         #AD96C3;
+  --color-gris-disabled: #A09CA4;
+  --color-disabled: #AD96C3;
+  --color-morado-fosfo: #7E57D7;
+  --color-rojo-claro: #EF7474;
+  --color-rojo-oscuro: #BC3737; 
   --color-texto-oscuro:     #11061A; /* lo uso en MyFriends.tsx */
   --color-texto-claro:      #F3F2F3; /* lo uso en MyFriends.tsx */
   --color-morado-hover:     #7E57D7; /* lo uso en MyFriends.tsx */
   --color-rojo-error:       #BC3737; /* lo uso en MyFriends.tsx */
   --color-rojo-error-hover: #a02d2d; /* lo uso en MyFriends.tsx */
+  --color-gris-claro:       #E7E6E8; 
+  --color-amarillo-warn:    #FFD796;
+  /* Additional card colors */ 
+  --color-royal-blue: #261D82; 
+  --color-light-blue: #46AEE6;
+}
+
+/* Toast animation */
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
 }

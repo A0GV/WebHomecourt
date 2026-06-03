@@ -53,8 +53,8 @@ const EventReportRow = ({ id, event, location, date, host, pfp, priority, status
         </div>
       </td>
       <td className="px-4 py-3 text-center">
-        <span className={`inline-block w-24 py-1 rounded-full text-sm font-medium text-center ${priorityStyles[priority]}`}>
-          {priority}
+        <span className={`inline-block w-24 py-1 rounded-full text-sm font-medium text-center ${priorityStyles[priority?.charAt(0).toUpperCase() + priority?.slice(1).toLowerCase()]}`}>
+          {priority?.charAt(0).toUpperCase() + priority?.slice(1).toLowerCase()}
         </span>
       </td>
       <td className="px-4 py-3 text-center">
@@ -67,7 +67,7 @@ const EventReportRow = ({ id, event, location, date, host, pfp, priority, status
       </td>
       <td className="px-4 py-3 text-center">
         <button
-          onClick={() => navigate(`/admin/event/${id}`)}
+          onClick={() => navigate('/admin/event', { state: { id: id } })}
           className="w-28 border border-morado-lakers text-morado-lakers px-4 py-1 rounded-lg text-sm font-medium hover:bg-morado-lakers hover:text-white transition-colors"
         >
           {status === 'Pending' ? 'Review' : 'View'}
