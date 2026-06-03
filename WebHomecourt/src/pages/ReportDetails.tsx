@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import Nav from '../components/Nav'
 import UserHistory from '../components/ReportDetails/UserHistory'
 import ActionButtons from '../components/ReportDetails/ActionButtons'
-import { useParams } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getUserHistory } from './Admin'
@@ -20,7 +19,8 @@ const formatDate = (dateStr: string) => {
 
 const ReportDetails = () => {
   const navigate = useNavigate()
-  const { id } = useParams()
+  const location = useLocation()
+  const id = location.state?.id
   const [report, setReport] = useState<any>(null)
   const [userHistory, setUserHistory] = useState<any[]>([])
   const [alert, setAlert] = useState<{ title: string, message?: string, tone: 'success' | 'error' | 'warning' | 'info' } | null>(null)
@@ -55,6 +55,7 @@ const ReportDetails = () => {
           created_at,
           reported_user_id,
           reported_user:user_laker!reported_user_id(username, photo_url, reputation),
+          reporter:user_laker!reporter_user_id(username),
           event:event!event_id(event_name, date, max_players, court:court!court_id(name))
         `)
         .eq('ureport_id', id)
@@ -90,13 +91,11 @@ const ReportDetails = () => {
     handleAction('warning')
   }
 
-  if (!report) return <div>Loading...</div>
+  if (!report) return null
 
   //design
   return (
-    <div className="flex flex-col min-h-screen bg-zinc-100">
-      <Nav current="Admin" />
-
+    <div >
       <div className="px-4 md:px-14 py-5 mb-10">
         {/* Header */}
         <div className="w-full px-5 py-7 bg-violet-950 rounded-2xl flex items-center gap-3 mb-6">
@@ -122,31 +121,49 @@ const ReportDetails = () => {
               
               <h2>Event: {report.event?.event_name}</h2>
 
-              <div className="flex flex-wrap gap-25">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-12 w-fit">
                 <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-black" style={{ fontSize: '18px' }}>location_on</span>
+                  <span className="material-symbols-outlined text-black text-[18px]">location_on</span>
                   <p>Location: {report.event.court.name}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-black" style={{ fontSize: '18px' }}>groups</span>
+                  <span className="material-symbols-outlined text-black text-[18px]">groups</span>
                   <p>Participants: {report.event.max_players}</p>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <span className="material-symbols-outlined text-black" style={{ fontSize: '18px' }}>calendar_today</span>
-                <p>{formatDate(report.event?.date)}</p>
+                <div className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-black text-[18px]">calendar_today</span>
+                  <p>{formatDate(report.event?.date)}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="material-symbols-outlined text-black text-[18px]">assignment_ind</span>
+                  <p>Reported by: @{report.reporter?.username ?? 'N/A'}</p>
+                </div>
               </div>
 
               <hr className="border-amarillo-lakers border-t-2 my-4  -mx-12" />
 
 
               {/* Report Comment */}
+              <div className="grid gap-10" style={{ gridTemplateColumns: '2fr 1fr' }}>
+                <div className="flex flex-col gap-3">
+                  <h2 className="font-medium text-black" style={{ fontSize: '20px' }}>Report Comment</h2>
+                  <div className="bg-[#9382A5]/50 border border-gray-200 rounded-xl p-4 min-h-[150px]">
+                      <p className="text-black">{report.comment}</p>
+                  </div>
+                </div>
 
-              <h2 className="font-medium text-black" style={{ fontSize: '20px' }}>Report Comment</h2>
-              <div className="bg-[#9382A5]/50 border border-gray-200 rounded-xl p-4 min-h-[150px]">
-                <p className="text-black">{report.comment}</p>
+                <div className="flex flex-col gap-3">
+                  <h2 className="font-medium text-black" style={{ fontSize: '20px' }}>AI Analysis</h2>
+                  <div className="flex flex-wrap gap-3">
+                    {report.key_words?.map((kw: string) => (
+                      <span key={kw} className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-base">
+                        {kw}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
+                
 
               {/* Action Buttons */}
               <ActionButtons
@@ -207,6 +224,7 @@ const ReportDetails = () => {
                 photo_url: report.reported_user?.photo_url ?? '',
                 rating: report.reported_user?.reputation ?? 0,
                 totalReports: userHistory.length,
+                userId: report.reported_user_id,
               }}
               history={userHistory.map((h) => ({
                 event: h.event?.event_name ?? 'N/A',
