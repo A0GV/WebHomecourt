@@ -44,7 +44,7 @@ const UserReportRow = ({ id, event, reportedUser, pfp, priority, status }: UserR
         </div>
       </td>
       <td className="px-4 py-3 text-center">
-        <span className={`inline-block w-24 py-1 rounded-full text-sm font-medium text-center ${priorityStyles[priority]}`}>
+        <span className={`inline-block w-24 py-1 rounded-full text-sm font-medium text-center ${priorityStyles[priority?.charAt(0).toUpperCase() + priority?.slice(1).toLowerCase()]}`}>
           {priority}
         </span>
       </td>
@@ -58,7 +58,7 @@ const UserReportRow = ({ id, event, reportedUser, pfp, priority, status }: UserR
       </td>
       <td className="px-4 py-3 text-center">
         <button
-          onClick={() => navigate(`/admin/report/${id}`)}
+          onClick={() => navigate('/admin/report', { state: { id: id } })}
           className="w-28 border border-morado-lakers text-morado-lakers px-4 py-1 rounded-lg text-sm font-medium hover:bg-morado-lakers hover:text-white transition-colors"
         >
           {status === 'Pending' ? 'Review' : 'View'}

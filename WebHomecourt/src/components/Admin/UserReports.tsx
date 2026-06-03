@@ -10,8 +10,9 @@ const UserReportsTable = () => {
   useEffect(() => {
     const fetchReports = async () => {
       const data = await getUserReports()
+      const normalize = (p: string) => p?.charAt(0).toUpperCase() + p?.slice(1).toLowerCase()
       const sorted = [...data].sort((a, b) =>
-        (priorityOrder[a.priority] ?? 99) - (priorityOrder[b.priority] ?? 99)
+        (priorityOrder[normalize(a.priority)] ?? 99) - (priorityOrder[normalize(b.priority)] ?? 99)
       )
       setReports(sorted)
     }
@@ -24,8 +25,9 @@ const UserReportsTable = () => {
         <p className="text-white font-bold" style={{ fontSize: '26px' }}>User Reports</p>
       </div>
       <div className="overflow-x-auto">
+        <div className="max-h-[500px] overflow-y-auto">
         <table className="w-full min-w-[640px]">
-          <thead className="bg-morado-lakers text-white">
+          <thead className="bg-morado-lakers text-white sticky top-0 z-10">
             <tr>
               <th className="px-4 py-3 text-center font-medium" style={{ fontSize: '20px' }}>Report ID</th>
               <th className="px-4 py-3 text-center font-medium" style={{ fontSize: '20px' }}>Event</th>
@@ -50,6 +52,7 @@ const UserReportsTable = () => {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   )
 }
